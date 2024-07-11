@@ -10,7 +10,5 @@ O projeto se dá por um sistema para animais silvestres. Sistema esse que tem co
 *   Versão 17
 ### [Spring](https://spring.io/)
 *   versão 3.2.7
-### [React](https://react.dev/versions)
-*   versão 18.3.1
 ## :construction: Status do Projeto
 Inicial
