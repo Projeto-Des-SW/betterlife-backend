@@ -6,9 +6,7 @@ Projeto para implementação de um site para a disciplina de __Projeto de Desenv
 O projeto se dá por um sistema para animais silvestres. Sistema esse que tem como principal objetivo facilitar o acesso à informação e promover a imersão simplificada tanto para profissionais quanto para o público em geral referente aos animais silvestres.
 
 ## :hammer_and_wrench: Tecnologias que serão usadas
-### [Java](https://www.java.com/pt-BR/)
-*   Versão 17
-### [Spring](https://spring.io/)
-*   versão 3.2.7
+### [Node](https://nodejs.org/pt)
+*   versão 20.15.1
 ## :construction: Status do Projeto
 Inicial
