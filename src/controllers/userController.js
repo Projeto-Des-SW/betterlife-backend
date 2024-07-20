@@ -1,8 +1,7 @@
 const User = require('../models/userModel');
-
+const pool = require('../../config/db');
 exports.registerUser = async (req, res) => {
-    const { email, senha, nome, documento, telefone, tipousuarioid } = req.body;
-
+    const { email, senha, nome, documento, telefone, tipousuarioid } = req.body;    
     if (!email || !senha || !nome || !documento || !telefone || !tipousuarioid) {
         return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
     }
@@ -10,11 +9,12 @@ exports.registerUser = async (req, res) => {
     try {
         const client = await pool.connect();
         const queryText = `
-            INSERT INTO usuario (email, senha, nome, documento, telefone, tipousuarioid)
+            INSERT INTO usuario (email, senha, nome, telefone, tipousuarioid, documento)
             VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *;
         `;
-        const result = await client.query(queryText, [email, senha, nome, documento, telefone, tipousuarioid]);
+        
+        const result = await client.query(queryText, [email, senha, nome, telefone, tipousuarioid, documento]);
         client.release();
         return res.status(201).json(result.rows[0]);
     } catch (err) {
