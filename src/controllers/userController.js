@@ -1,12 +1,24 @@
 const User = require('../models/userModel');
 
-exports.createUser = async (req, res) => {
+exports.registerUser = async (req, res) => {
+    const { email, senha, nome, documento, telefone, tipousuarioid } = req.body;
+
+    if (!email || !senha || !nome || !documento || !telefone || !tipousuarioid) {
+        return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
+    }
+
     try {
-        const user = new User(req.body);
-        await user.save();
-        res.status(201).send(user);
-    } catch (error) {
-        res.status(400).send(error);
+        const client = await pool.connect();
+        const queryText = `
+            INSERT INTO usuario (email, senha, nome, documento, telefone, tipousuarioid)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING *;
+        `;
+        const result = await client.query(queryText, [email, senha, nome, documento, telefone, tipousuarioid]);
+        client.release();
+        return res.status(201).json(result.rows[0]);
+    } catch (err) {
+        return res.status(500).json({ error: 'Erro ao cadastrar usuário' });
     }
 };
 
