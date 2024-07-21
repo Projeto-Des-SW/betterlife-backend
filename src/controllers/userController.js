@@ -20,6 +20,7 @@ exports.registerUser = async (req, res) => {
         
         const result = await client.query(queryText, [email, senhaCriptografada, nome, telefone, tipousuarioid, documento]);
         client.release();
+        pool.closet();
         return res.status(201).json(result.rows[0]);
     } catch (err) {
         return res.status(500).json({ error: 'Erro ao cadastrar usuário' });
