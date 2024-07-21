@@ -1,10 +1,14 @@
 const User = require('../models/userModel');
+const crypto = require('crypto');
 const pool = require('../../config/db');
+
 exports.registerUser = async (req, res) => {
     const { email, senha, nome, documento, telefone, tipousuarioid } = req.body;    
     if (!email || !senha || !nome || !documento || !telefone || !tipousuarioid) {
         return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
     }
+
+    const senhaCriptografada = crypto.createHash('md5').update(senha).digest('hex');
 
     try {
         const client = await pool.connect();
@@ -14,7 +18,7 @@ exports.registerUser = async (req, res) => {
             RETURNING *;
         `;
         
-        const result = await client.query(queryText, [email, senha, nome, telefone, tipousuarioid, documento]);
+        const result = await client.query(queryText, [email, senhaCriptografada, nome, telefone, tipousuarioid, documento]);
         client.release();
         return res.status(201).json(result.rows[0]);
     } catch (err) {
