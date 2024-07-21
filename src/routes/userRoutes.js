@@ -8,6 +8,7 @@ router.use(cors())
 router.options('*',  cors())
 
 router.post('/api/register', userController.registerUser);
+router.post('/api/login', userController.loginUser);
 router.get('/users', auth, userController.getAllUsers);
 router.get('/users/:id', auth, userController.getUserById);
 router.patch('/users/:id', auth, userController.updateUser);
