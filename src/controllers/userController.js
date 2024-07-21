@@ -3,7 +3,7 @@ const crypto = require('crypto');
 const pool = require('../../config/db');
 
 exports.registerUser = async (req, res) => {
-    const { email, senha, nome, documento, telefone, tipousuarioid } = req.body;    
+    const { email, senha, nome, documento, telefone, tipousuarioid } = req.body;
     if (!email || !senha || !nome || !documento || !telefone || !tipousuarioid) {
         return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
     }
@@ -17,12 +17,39 @@ exports.registerUser = async (req, res) => {
             VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *;
         `;
-        
+
         const result = await client.query(queryText, [email, senhaCriptografada, nome, telefone, tipousuarioid, documento]);
         client.release();
+
         return res.status(201).json(result.rows[0]);
     } catch (err) {
         return res.status(500).json({ error: 'Erro ao cadastrar usuário' });
+    }
+};
+
+exports.loginUser = async (req, res) => {
+    const { email, senha } = req.body;
+    if (!email || !senha) {
+        return res.status(400).json({ error: 'Email e senha são obrigatórios' });
+    }
+
+    const senhaCriptografada = crypto.createHash('md5').update(senha).digest('hex');
+
+    try {
+        const client = await pool.connect();
+        const queryText = `
+            SELECT * FROM usuario WHERE email = $1 AND senha = $2;
+        `;
+        const result = await client.query(queryText, [email, senhaCriptografada]);
+        client.release();
+
+        if (result.rows.length === 0) {
+            return res.status(401).json({ error: 'Email ou senha incorretos' });
+        }
+
+        return res.status(200).json(result.rows[0]);
+    } catch (err) {
+        return res.status(500).json({ error: 'Erro ao fazer login' });
     }
 };
 
