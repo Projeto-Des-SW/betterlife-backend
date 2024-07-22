@@ -37,19 +37,25 @@ exports.loginUser = async (req, res) => {
 
     try {
         const client = await pool.connect();
+
         const queryText = `
-            SELECT * FROM usuario WHERE email = $1 AND senha = $2;
+            SELECT u.email, u.nome, u.documento, u.telefone, t.nome AS tipoUsuario
+            FROM usuario u
+            INNER JOIN tipousuario t ON u.tipousuarioid = t.id
+            WHERE u.email = $1 AND u.senha = $2;
         `;
+        
         const result = await client.query(queryText, [email, senhaCriptografada]);
         client.release();
 
         if (result.rows.length === 0) {
-            return res.status(401).json({ error: 'Email ou senha incorretos' });
+            return res.status(401).json({ error: 'Email ou senha incorretos.' });
         }
 
         return res.status(200).json(result.rows[0]);
     } catch (err) {
-        return res.status(500).json({ error: 'Erro ao fazer login' });
+        console.error('Error:', err);
+        return res.status(500).json({ error: 'Erro ao fazer login.' });
     }
 };
 
