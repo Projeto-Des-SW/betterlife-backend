@@ -71,6 +71,64 @@ exports.loginUser = async (req, res) => {
     }
 };
 
+exports.sendEmailReset = async (req, res) => {
+    const { email } = req.body;
+    if (!email) {
+        return res.status(400).json({ error: 'Email é obrigatório' });
+    }
+
+    try {
+        const client = await pool.connect();
+
+        const queryText = `
+            SELECT *
+            FROM usuario
+            WHERE email = $1;
+        `;
+
+        const result = await client.query(queryText, [email]);
+
+        if (result.rows.length === 0) {
+            client.release();
+            return res.status(401).json({ error: 'Email não encontrado.' });
+        }
+
+        const token = crypto.createHash('md5').update(Math.random().toString()).digest('hex');
+        const dataValidade = new Date(Date.now() + 30 * 60 * 1000);
+
+        const queryInsertRecuperacao = `
+            INSERT INTO recuperarcredenciais (token, datavalidade, usuarioid)
+            VALUES ($1, $2, $3)
+            RETURNING *;
+        `;
+
+        const resultInsert = await client.query(queryInsertRecuperacao, [token, dataValidade, result.rows[0].id]);
+
+        const urlRedefinirSenha = `http://localhost:3000/redefinirSenha?token=${token}`;
+
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: 'Recuperação de senha',
+            text: `Você solicitou a recuperação de senha. Clique no link ao lado para seguir com a redefinição -> ${urlRedefinirSenha}`
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error('Erro ao enviar email:', error);
+                return res.status(500).json({ error: 'Erro ao enviar email de recuperação.' });
+            }
+            console.log('Email enviado:', info.response);
+            client.release();
+            return res.status(200).json(resultInsert.rows[0]);
+        });
+
+    } catch (err) {
+        console.error('Error:', err);
+        return res.status(500).json({ error: 'Erro ao solicitar recuperação de senha.' });
+    }
+};
+
 exports.resetPasswordUser = async (req, res) => {
     const { email } = req.body;
     if (!email) {
