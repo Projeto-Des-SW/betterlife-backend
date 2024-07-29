@@ -13,7 +13,6 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASS
     }
 });
-
 exports.registerUser = async (req, res) => {
     const { email, senha, nome, documento, telefone, tipousuarioid } = req.body;
     if (!email || !senha || !nome || !documento || !telefone || !tipousuarioid) {
@@ -110,7 +109,7 @@ exports.sendEmailReset = async (req, res) => {
             from: process.env.EMAIL_USER,
             to: email,
             subject: 'Recuperação de senha',
-            text: `Você solicitou a recuperação de senha. Clique no link ao lado para seguir com a redefinição -> ${urlRedefinirSenha}`
+            html: `Você solicitou a recuperação de senha. Clique no <a href="${urlRedefinirSenha}">link ao lado</a> para seguir com a redefinição.`
         };
 
         transporter.sendMail(mailOptions, (error, info) => {
@@ -130,57 +129,57 @@ exports.sendEmailReset = async (req, res) => {
 };
 
 exports.resetPasswordUser = async (req, res) => {
-    const { email } = req.body;
-    if (!email) {
-        return res.status(400).json({ error: 'Email é obrigatório' });
+    const { senha, confirmacaoSenha, token } = req.body;
+
+    if (senha !== confirmacaoSenha) {
+        return res.status(400).json({ error: 'Senhas não coincidem.' });
     }
 
     try {
         const client = await pool.connect();
 
-        const queryText = `
+        const queryToken = `
             SELECT *
-            FROM usuario
-            WHERE email = $1;
+            FROM recuperarcredenciais
+            WHERE token = $1
+              AND datavalidade > NOW();
         `;
 
-        const result = await client.query(queryText, [email]);
+        const resultToken = await client.query(queryToken, [token]);
 
-        if (result.rows.length === 0) {
+        if (resultToken.rows.length === 0) {
             client.release();
-            return res.status(401).json({ error: 'Email não encontrado.' });
+            return res.status(401).json({ error: 'Token inválido ou expirado.' });
         }
 
-        const token = crypto.createHash('md5').update(Math.random().toString()).digest('hex');
-        const dataValidade = new Date(Date.now() + 30 * 60 * 1000);
+        if (resultToken.rows[0].datautilizacao) {
+            client.release();
+            return res.status(400).json({ error: 'Token já utilizado.' });
+        }
 
-        const queryInsertRecuperacao = `
-            INSERT INTO recuperarcredenciais (token, datavalidade, usuarioid)
-            VALUES ($1, $2, $3)
-            RETURNING *;
+        const userId = resultToken.rows[0].usuarioid;
+
+        const senhaHash = crypto.createHash('md5').update(senha).digest('hex');
+
+        const queryUpdatePassword = `
+            UPDATE usuario
+            SET senha = $1
+            WHERE id = $2;
         `;
 
-        const resultInsert = await client.query(queryInsertRecuperacao, [token, dataValidade, result.rows[0].id]);
+        await client.query(queryUpdatePassword, [senhaHash, userId]);
 
-        const urlRedefinirSenha = `http://localhost:3000/redefinirSenha?token=${token}`;
+        const queryUpdateDataUtilizacao = `
+            UPDATE recuperarcredenciais
+            SET datautilizacao = NOW()
+            WHERE token = $1;
+        `;
 
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: email,
-            subject: 'Recuperação de senha',
-            text: `Você solicitou a recuperação de senha. Clique no link ao lado para seguir com a redefinição -> ${urlRedefinirSenha}`
-        };
+        await client.query(queryUpdateDataUtilizacao, [token]);
 
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                console.error('Erro ao enviar email:', error);
-                return res.status(500).json({ error: 'Erro ao enviar email de recuperação.' });
-            }
-            console.log('Email enviado:', info.response);
-            client.release();
-            return res.status(200).json(resultInsert.rows[0]);
-        });
+        client.release();
 
+        return res.status(200).json({ message: 'Senha atualizada com sucesso.' });
     } catch (err) {
         console.error('Error:', err);
         return res.status(500).json({ error: 'Erro ao solicitar recuperação de senha.' });
