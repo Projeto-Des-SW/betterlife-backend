@@ -4,7 +4,6 @@ const userController = require('../controllers/userController');
 const auth = require('../middlewares/authMiddleware');
 const cors = require('cors');
 
-
 router.use(cors())
 router.options('*',  cors())
 
@@ -14,10 +13,6 @@ router.post('/api/sendEmailReset', userController.sendEmailReset)
 router.post('/api/resetPassword', userController.resetPasswordUser)
 router.post('/api/resetPassword', userController.resetPasswordUser)
 router.put('/api/updateUser/:id', userController.updateUser);
-
-// router.get('/users', auth, userController.getAllUsers);
-// router.get('/users/:id', auth, userController.getUserById);
-// router.patch('/users/:id', auth, userController.updateUser);
-// router.delete('/users/:id', auth, userController.deleteUser);
+router.put('/api/deleteUser/:id', userController.deleteUser);
 
 module.exports = router;
