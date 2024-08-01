@@ -63,7 +63,13 @@ exports.loginUser = async (req, res) => {
             return res.status(401).json({ error: 'Email ou senha incorretos.' });
         }
 
-        return res.status(200).json(result.rows[0]);
+        const user = result.rows[0];
+
+        if (user.deletado) {
+            return res.status(403).json({ error: 'Usuário desativado.' });
+        }
+
+        return res.status(200).json(user);
     } catch (err) {
         console.error('Error:', err);
         return res.status(500).json({ error: 'Erro ao fazer login.' });
@@ -243,13 +249,26 @@ exports.updateUser = async (req, res) => {
 };
 
 exports.deleteUser = async (req, res) => {
+    const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).json({ error: 'ID do usuário é obrigatório' });
+    }
+
+    const queryText = 'UPDATE usuario SET deletado = true WHERE id = $1 RETURNING *;';
+
     try {
-        const user = await User.findByIdAndDelete(req.params.id);
-        if (!user) {
-            return res.status(404).send();
+        const client = await pool.connect();
+        const result = await client.query(queryText, [id]);
+
+        if (result.rows.length === 0) {
+            client.release();
+            return res.status(404).json({ error: 'Usuário não encontrado' });
         }
-        res.send(user);
-    } catch (error) {
-        res.status(500).send(error);
+
+        client.release();
+        return res.status(200).json(result.rows[0]);
+    } catch (err) {
+        return res.status(500).json({ error: 'Erro ao deletar usuário' });
     }
 };
