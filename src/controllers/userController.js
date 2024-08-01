@@ -50,7 +50,7 @@ exports.loginUser = async (req, res) => {
         const client = await pool.connect();
 
         const queryText = `
-            SELECT u.email, u.nome, u.documento, u.telefone, t.nome AS tipoUsuario
+            SELECT u.id, u.email, u.nome, u.documento, u.telefone, u.deletado, u.tipousuarioid, t.nome AS tipoUsuario
             FROM usuario u
             INNER JOIN tipousuario t ON u.tipousuarioid = t.id
             WHERE u.email = $1 AND u.senha = $2;
@@ -186,47 +186,59 @@ exports.resetPasswordUser = async (req, res) => {
     }
 };
 
-exports.getUserById = async (req, res) => {
-    try {
-        const user = await User.findById(req.params.id);
-        if (!user) {
-            return res.status(404).send();
-        }
-        res.send(user);
-    } catch (error) {
-        res.status(500).send(error);
-    }
-};
-
-exports.getAllUsers = async (req, res) => {
-    try {
-        const users = await User.find({});
-        res.send(users);
-    } catch (error) {
-        res.status(500).send(error);
-    }
-};
-
 exports.updateUser = async (req, res) => {
-    const updates = Object.keys(req.body);
-    const allowedUpdates = ['name', 'email', 'password'];
-    const isValidOperation = updates.every((update) => allowedUpdates.includes(update));
+    const { id } = req.params;
+    const { email, nome, documento, telefone } = req.body;
 
-    if (!isValidOperation) {
-        return res.status(400).send({ error: 'Invalid updates!' });
+    if (!id) {
+        return res.status(400).json({ error: 'ID do usuário é obrigatório' });
     }
 
+    const allowedUpdates = ['email', 'nome', 'documento', 'telefone'];
+    const updates = Object.keys(req.body).filter(update => allowedUpdates.includes(update));
+
+    if (updates.length === 0) {
+        return res.status(400).json({ error: 'Nenhum campo válido para atualização' });
+    }
+
+    let queryText = 'UPDATE usuario SET ';
+    const queryValues = [];
+    updates.forEach((field, index) => {
+        queryValues.push(req.body[field]);
+        queryText += `${field} = $${index + 1}, `;
+    });
+    queryText = queryText.slice(0, -2);
+    queryText += ' WHERE id = $' + (updates.length + 1) + ' RETURNING *;';
+    queryValues.push(id);
+
     try {
-        const user = await User.findById(req.params.id);
-        if (!user) {
-            return res.status(404).send();
+        const client = await pool.connect();
+        const result = await client.query(queryText, queryValues);
+
+        if (result.rows.length === 0) {
+            client.release();
+            return res.status(404).json({ error: 'Usuário não encontrado' });
         }
 
-        updates.forEach((update) => user[update] = req.body[update]);
-        await user.save();
-        res.send(user);
-    } catch (error) {
-        res.status(400).send(error);
+        const user = result.rows[0];
+
+        const tipoUsuarioQuery = `
+            SELECT u.id, u.email, u.nome, u.documento, u.telefone, u.deletado, u.tipousuarioid, t.nome AS tipoUsuario
+            FROM usuario u
+            INNER JOIN tipousuario t ON u.tipousuarioid = t.id
+            WHERE u.id = $1;
+        `;
+
+        const tipoUsuarioResult = await client.query(tipoUsuarioQuery, [id]);
+        client.release();
+
+        if (tipoUsuarioResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Erro ao recuperar informações do tipo de usuário' });
+        }
+
+        return res.status(200).json(tipoUsuarioResult.rows[0]);
+    } catch (err) {
+        return res.status(500).json({ error: 'Erro ao atualizar usuário' });
     }
 };
 
