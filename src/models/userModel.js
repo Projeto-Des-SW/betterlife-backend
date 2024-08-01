@@ -21,6 +21,25 @@ const userSchema = new mongoose.Schema({
         minlength: 7,
         trim: true
     },
+    documento: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true
+    },
+    telefone: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    tipousuarioid: {
+        type: Number,
+        required: true
+    },
+    deletado: {
+        type: Boolean,
+        default: false
+    },
     tokens: [{
         token: {
             type: String,
