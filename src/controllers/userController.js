@@ -249,25 +249,38 @@ exports.updateUser = async (req, res) => {
 };
 
 exports.deleteUser = async (req, res) => {
-    const { id } = req.params;
-
-    if (!id) {
-        return res.status(400).json({ error: 'ID do usuário é obrigatório' });
+    
+    const { senha , id } = req.body;
+    if (!id || !senha) {
+        return res.status(400).json({ error: 'ID e Senha do usuário são obrigatórias' });
     }
-
+    const senhaCriptografada = crypto.createHash('md5').update(senha).digest('hex');
     const queryText = 'UPDATE usuario SET deletado = true WHERE id = $1 RETURNING *;';
-
+    const querySenha = 'SELECT senha FROM usuario WHERE id = $1';
     try {
         const client = await pool.connect();
-        const result = await client.query(queryText, [id]);
+        const senhaUserResult = await client.query(querySenha, [id]);
 
-        if (result.rows.length === 0) {
+        if (senhaUserResult.rows.length === 0) {
             client.release();
             return res.status(404).json({ error: 'Usuário não encontrado' });
         }
 
-        client.release();
-        return res.status(200).json(result.rows[0]);
+        const senhaHashDoBanco = senhaUserResult.rows[0].senha;
+        if (senhaCriptografada === senhaHashDoBanco) {
+            const result = await client.query(queryText, [id]);
+
+            if (result.rows.length === 0) {
+                client.release();
+                return res.status(404).json({ error: 'Usuário não encontrado' });
+            }
+
+            client.release();
+            return res.status(200).json(result.rows[0]);
+        } else {
+            client.release();
+            return res.status(401).json({ error: 'Senha incorreta' });
+        }
     } catch (err) {
         return res.status(500).json({ error: 'Erro ao deletar usuário' });
     }
