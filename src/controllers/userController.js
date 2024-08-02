@@ -115,7 +115,15 @@ exports.sendEmailReset = async (req, res) => {
             from: process.env.EMAIL_USER,
             to: email,
             subject: 'Recuperação de senha',
-            html: `Você solicitou a recuperação de senha. Clique no <a href="${urlRedefinirSenha}">link ao lado</a> para seguir com a redefinição.`
+            html: `
+                <div style="font-family: Arial, sans-serif; color: #333;">
+                    <h2 style="color: #4CAF50;">Recuperação de Senha</h2>
+                    <p>Você solicitou a recuperação de senha. Clique no botão abaixo para seguir com a redefinição:</p>
+                    <a href="${urlRedefinirSenha}" style="display: inline-block; padding: 10px 20px; font-size: 16px; color: white; background-color: #4CAF50; text-decoration: none; border-radius: 5px;">Redefinir Senha</a>
+                    <p style="margin-top: 20px;">Se você não solicitou esta recuperação, por favor ignore este e-mail.</p>
+                    <p>Atenciosamente,<br/>Sua Equipe de Suporte</p>
+                </div>
+            `
         };
 
         transporter.sendMail(mailOptions, (error, info) => {
@@ -133,6 +141,7 @@ exports.sendEmailReset = async (req, res) => {
         return res.status(500).json({ error: 'Erro ao solicitar recuperação de senha.' });
     }
 };
+
 
 exports.resetPasswordUser = async (req, res) => {
     const { senha, confirmacaoSenha, token } = req.body;
