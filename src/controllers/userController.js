@@ -92,6 +92,7 @@ exports.loginUser = async (req, res) => {
                 u.telefone, 
                 u.deletado, 
                 u.tipousuarioid, 
+                u.enderecoid
                 t.nome AS tipoUsuario,
                 e.cep, 
                 e.logradouro, 
@@ -258,7 +259,7 @@ exports.resetPasswordUser = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
     const { id } = req.params;
-    const { email, nome, documento, telefone } = req.body;
+    const { email, nome, documento, telefone, endereco } = req.body;
 
     if (!id) {
         return res.status(400).json({ error: 'ID do usuário é obrigatório' });
