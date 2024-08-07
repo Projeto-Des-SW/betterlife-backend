@@ -2,6 +2,7 @@ const User = require('../models/userModel');
 const crypto = require('crypto');
 const pool = require('../../config/db');
 const nodemailer = require('nodemailer');
+const axios = require('axios');
 require('dotenv').config();
 
 const transporter = nodemailer.createTransport({
@@ -13,9 +14,10 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASS
     }
 });
+
 exports.registerUser = async (req, res) => {
-    const { email, senha, nome, documento, telefone, tipousuarioid } = req.body;
-    if (!email || !senha || !nome || !documento || !telefone || !tipousuarioid) {
+    const { email, senha, nome, documento, telefone, tipousuarioid, endereco } = req.body;
+    if (!email || !senha || !nome || !documento || !telefone || !tipousuarioid || !endereco) {
         return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
     }
 
@@ -23,18 +25,50 @@ exports.registerUser = async (req, res) => {
 
     try {
         const client = await pool.connect();
-        const queryText = `
-            INSERT INTO usuario (email, senha, nome, telefone, tipousuarioid, documento)
-            VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING *;
-        `;
 
-        const result = await client.query(queryText, [email, senhaCriptografada, nome, telefone, tipousuarioid, documento]);
-        client.release();
+        try {
+            await client.query('BEGIN');
 
-        return res.status(201).json(result.rows[0]);
+            const enderecoQuery = `
+                INSERT INTO endereco (cep, logradouro, bairro, uf, pais, complemento, numero, cidade)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                RETURNING id;
+            `;
+
+            const enderecoResult = await client.query(enderecoQuery, [
+                endereco.cep,
+                endereco.logradouro,
+                endereco.bairro,
+                endereco.uf,
+                endereco.pais,
+                endereco.complemento,
+                endereco.numero,
+                endereco.cidade
+            ]);
+
+            const enderecoId = enderecoResult.rows[0].id;
+
+            const usuarioQuery = `
+                INSERT INTO usuario (email, senha, nome, telefone, tipousuarioid, documento, enderecoid)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+                RETURNING *;
+            `;
+
+            const userResult = await client.query(usuarioQuery, [email, senhaCriptografada, nome, telefone, tipousuarioid, documento, enderecoId]);
+
+            await client.query('COMMIT');
+
+            return res.status(201).json(userResult.rows[0]);
+        } catch (err) {
+            await client.query('ROLLBACK');
+            console.error(err);
+            return res.status(500).json({ error: 'Erro ao cadastrar usuário e endereço' });
+        } finally {
+            client.release();
+        }
     } catch (err) {
-        return res.status(500).json({ error: 'Erro ao cadastrar usuário' });
+        console.error(err);
+        return res.status(500).json({ error: 'Erro ao conectar ao banco de dados' });
     }
 };
 
@@ -50,10 +84,31 @@ exports.loginUser = async (req, res) => {
         const client = await pool.connect();
 
         const queryText = `
-            SELECT u.id, u.email, u.nome, u.documento, u.telefone, u.deletado, u.tipousuarioid, t.nome AS tipoUsuario
-            FROM usuario u
-            INNER JOIN tipousuario t ON u.tipousuarioid = t.id
-            WHERE u.email = $1 AND u.senha = $2;
+          SELECT 
+                u.id, 
+                u.email, 
+                u.nome, 
+                u.documento, 
+                u.telefone, 
+                u.deletado, 
+                u.tipousuarioid, 
+                t.nome AS tipoUsuario,
+                e.cep, 
+                e.logradouro, 
+                e.bairro, 
+                e.uf, 
+                e.pais, 
+                e.complemento, 
+                e.numero, 
+                e.cidade
+            FROM 
+                usuario u
+            INNER JOIN 
+                tipousuario t ON u.tipousuarioid = t.id
+            INNER JOIN 
+                endereco e ON u.enderecoid = e.id
+            WHERE 
+                u.email = $1 AND u.senha = $2;
         `;
 
         const result = await client.query(queryText, [email, senhaCriptografada]);
@@ -258,8 +313,8 @@ exports.updateUser = async (req, res) => {
 };
 
 exports.deleteUser = async (req, res) => {
-    
-    const { senha , id } = req.body;
+
+    const { senha, id } = req.body;
     if (!id || !senha) {
         return res.status(400).json({ error: 'ID e Senha do usuário são obrigatórias' });
     }
@@ -292,5 +347,16 @@ exports.deleteUser = async (req, res) => {
         }
     } catch (err) {
         return res.status(500).json({ error: 'Erro ao deletar usuário' });
+    }
+};
+
+exports.consultCep = async (req, res) => {
+    const { cep } = req.params;
+
+    try {
+        const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
+        res.json(response.data);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch CEP information', message: err.message });
     }
 };
