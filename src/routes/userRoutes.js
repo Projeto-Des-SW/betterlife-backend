@@ -14,5 +14,6 @@ router.post('/api/resetPassword', userController.resetPasswordUser)
 router.post('/api/resetPassword', userController.resetPasswordUser)
 router.put('/api/updateUser/:id', userController.updateUser);
 router.put('/api/deleteUser/:id', userController.deleteUser);
+router.get('/api/consultCep/:cep', userController.consultCep);
 
 module.exports = router;
