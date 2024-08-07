@@ -92,7 +92,7 @@ exports.loginUser = async (req, res) => {
                 u.telefone, 
                 u.deletado, 
                 u.tipousuarioid, 
-                u.enderecoid
+                u.enderecoid,
                 t.nome AS tipoUsuario,
                 e.cep, 
                 e.logradouro, 
