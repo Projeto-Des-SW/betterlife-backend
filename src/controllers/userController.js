@@ -259,7 +259,7 @@ exports.resetPasswordUser = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
     const { id } = req.params;
-    const { email, nome, documento, telefone, endereco } = req.body;
+    const { email, nome, documento, telefone, enderecoId, endereco } = req.body;
 
     if (!id) {
         return res.status(400).json({ error: 'ID do usuário é obrigatório' });
@@ -268,7 +268,7 @@ exports.updateUser = async (req, res) => {
     const allowedUpdates = ['email', 'nome', 'documento', 'telefone'];
     const updates = Object.keys(req.body).filter(update => allowedUpdates.includes(update));
 
-    if (updates.length === 0) {
+    if (updates.length === 0 && !endereco) {
         return res.status(400).json({ error: 'Nenhum campo válido para atualização' });
     }
 
@@ -282,16 +282,39 @@ exports.updateUser = async (req, res) => {
     queryText += ' WHERE id = $' + (updates.length + 1) + ' RETURNING *;';
     queryValues.push(id);
 
+    const client = await pool.connect();
+
     try {
-        const client = await pool.connect();
+        await client.query('BEGIN');
+
         const result = await client.query(queryText, queryValues);
 
         if (result.rows.length === 0) {
+            await client.query('ROLLBACK');
             client.release();
             return res.status(404).json({ error: 'Usuário não encontrado' });
         }
 
-        const user = result.rows[0];
+        if (endereco) {
+            const { cep, logradouro, bairro, uf, pais, complemento, numero, cidade, deletado } = endereco;
+            const enderecoQuery = `
+                UPDATE endereco
+                SET cep = $1, logradouro = $2, bairro = $3, uf = $4, pais = $5,
+                    complemento = $6, numero = $7, cidade = $8, deletado = $9
+                WHERE id = $10
+                RETURNING *;
+            `;
+            const enderecoValues = [cep, logradouro, bairro, uf, pais, complemento, numero, cidade, deletado, result.rows[0].enderecoid];
+            const enderecoResult = await client.query(enderecoQuery, enderecoValues);
+
+            if (enderecoResult.rows.length === 0) {
+                await client.query('ROLLBACK');
+                client.release();
+                return res.status(404).json({ error: 'Endereço não encontrado' });
+            }
+        }
+
+        await client.query('COMMIT');
 
         const tipoUsuarioQuery = `
             SELECT u.id, u.email, u.nome, u.documento, u.telefone, u.deletado, u.tipousuarioid, t.nome AS tipoUsuario
@@ -309,6 +332,8 @@ exports.updateUser = async (req, res) => {
 
         return res.status(200).json(tipoUsuarioResult.rows[0]);
     } catch (err) {
+        await client.query('ROLLBACK');
+        client.release();
         return res.status(500).json({ error: 'Erro ao atualizar usuário' });
     }
 };
