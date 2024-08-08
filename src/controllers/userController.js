@@ -317,9 +317,29 @@ exports.updateUser = async (req, res) => {
         await client.query('COMMIT');
 
         const tipoUsuarioQuery = `
-            SELECT u.id, u.email, u.nome, u.documento, u.telefone, u.deletado, u.tipousuarioid, t.nome AS tipoUsuario
+            SELECT 
+                u.id, 
+                u.email, 
+                u.nome, 
+                u.documento, 
+                u.telefone, 
+                u.deletado, 
+                u.tipousuarioid, 
+                u.enderecoid,
+                t.nome AS tipoUsuario,
+                e.cep, 
+                e.logradouro, 
+                e.bairro, 
+                e.uf, 
+                e.pais, 
+                e.complemento, 
+                e.numero, 
+                e.cidade
             FROM usuario u
-            INNER JOIN tipousuario t ON u.tipousuarioid = t.id
+            INNER JOIN 
+                tipousuario t ON u.tipousuarioid = t.id
+            INNER JOIN 
+                endereco e ON u.enderecoid = e.id
             WHERE u.id = $1;
         `;
 
