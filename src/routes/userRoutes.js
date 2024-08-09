@@ -11,7 +11,6 @@ router.post('/api/register', userController.registerUser);
 router.post('/api/login', userController.loginUser);
 router.post('/api/sendEmailReset', userController.sendEmailReset)
 router.post('/api/resetPassword', userController.resetPasswordUser)
-router.post('/api/resetPassword', userController.resetPasswordUser)
 router.put('/api/updateUser/:id', userController.updateUser);
 router.put('/api/deleteUser/:id', userController.deleteUser);
 router.get('/api/consultCep/:cep', userController.consultCep);
