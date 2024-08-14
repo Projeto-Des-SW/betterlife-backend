@@ -1,5 +1,5 @@
 const express = require('express');
-const userRouter = require('./routes/userRoutes');
+const routes = require('./routes/routes');
 const pool = require('../config/db');
 
 const app = express();
@@ -14,6 +14,6 @@ pool.query('SELECT NOW()', (err, res) => {
   }
 });
 
-app.use(userRouter);
+app.use(routes);
 
 module.exports = app;
