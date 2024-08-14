@@ -441,22 +441,29 @@ exports.updateTaxonomia = async (req, res) => {
         return res.status(400).json({ error: 'ID da taxonomia é obrigatório' });
     }
 
-    const allowedUpdates = ['classe', 'ordem', 'subordem', 'filo', 'reino', 'animalid'];
-    const updates = Object.keys(req.body).filter(update => allowedUpdates.includes(update));
+    // Cria um objeto com os campos que podem ser atualizados
+    const fieldsToUpdate = { classe, ordem, subordem, filo, reino, animalid };
+    const validFields = {};
 
-    if (updates.length === 0) {
+    // Filtra apenas os campos válidos que foram fornecidos no corpo da requisição
+    for (let field in fieldsToUpdate) {
+        if (fieldsToUpdate[field] !== undefined) {
+            validFields[field] = fieldsToUpdate[field];
+        }
+    }
+
+    // Se nenhum campo válido foi fornecido, retorna um erro
+    if (Object.keys(validFields).length === 0) {
         return res.status(400).json({ error: 'Nenhum campo válido para atualização' });
     }
 
-    let queryText = 'UPDATE taxonomia SET ';
-    const queryValues = [];
-    updates.forEach((field, index) => {
-        queryValues.push(req.body[field]);
-        queryText += `${field} = $${index + 1}, `;
-    });
-    queryText = queryText.slice(0, -2); // Remove a última vírgula
-    queryText += ' WHERE id = $' + (updates.length + 1) + ' RETURNING *;';
-    queryValues.push(id);
+    // Constrói a query dinamicamente
+    const setClause = Object.keys(validFields)
+        .map((field, index) => `${field} = $${index + 1}`)
+        .join(', ');
+
+    const queryText = `UPDATE taxonomia SET ${setClause} WHERE id = $${Object.keys(validFields).length + 1} RETURNING *;`;
+    const queryValues = [...Object.values(validFields), id];
 
     try {
         const client = await pool.connect();
@@ -474,3 +481,4 @@ exports.updateTaxonomia = async (req, res) => {
         return res.status(500).json({ error: 'Erro ao atualizar taxonomia' });
     }
 };
+
