@@ -406,3 +406,71 @@ exports.consultCep = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch CEP information', message: err.message });
     }
 };
+
+exports.deleteTaxonomia = async (req, res) => {
+    const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).json({ error: 'ID da taxonomia é obrigatório' });
+    }
+
+    const queryText = 'UPDATE taxonomia SET deletado = true WHERE id = $1 RETURNING *;';
+
+    try {
+        const client = await pool.connect();
+        const result = await client.query(queryText, [id]);
+
+        if (result.rows.length === 0) {
+            client.release();
+            return res.status(404).json({ error: 'Taxonomia não encontrada' });
+        }
+
+        client.release();
+        return res.status(200).json(result.rows[0]);
+    } catch (err) {
+        console.error('Erro ao deletar taxonomia:', err);
+        return res.status(500).json({ error: 'Erro ao deletar taxonomia' });
+    }
+};
+
+exports.updateTaxonomia = async (req, res) => {
+    const { id } = req.params;
+    const { classe, ordem, subordem, filo, reino, animalid } = req.body;
+
+    if (!id) {
+        return res.status(400).json({ error: 'ID da taxonomia é obrigatório' });
+    }
+
+    const allowedUpdates = ['classe', 'ordem', 'subordem', 'filo', 'reino', 'animalid'];
+    const updates = Object.keys(req.body).filter(update => allowedUpdates.includes(update));
+
+    if (updates.length === 0) {
+        return res.status(400).json({ error: 'Nenhum campo válido para atualização' });
+    }
+
+    let queryText = 'UPDATE taxonomia SET ';
+    const queryValues = [];
+    updates.forEach((field, index) => {
+        queryValues.push(req.body[field]);
+        queryText += `${field} = $${index + 1}, `;
+    });
+    queryText = queryText.slice(0, -2); // Remove a última vírgula
+    queryText += ' WHERE id = $' + (updates.length + 1) + ' RETURNING *;';
+    queryValues.push(id);
+
+    try {
+        const client = await pool.connect();
+        const result = await client.query(queryText, queryValues);
+
+        if (result.rows.length === 0) {
+            client.release();
+            return res.status(404).json({ error: 'Taxonomia não encontrada' });
+        }
+
+        client.release();
+        return res.status(200).json(result.rows[0]);
+    } catch (err) {
+        console.error('Erro ao atualizar taxonomia:', err);
+        return res.status(500).json({ error: 'Erro ao atualizar taxonomia' });
+    }
+};
