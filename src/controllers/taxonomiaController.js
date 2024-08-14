@@ -3,19 +3,19 @@ require('dotenv').config();
 
 // Criação de uma nova taxonomia
 exports.createTaxonomia = async (req, res) => {
-    const { classe, ordem, subordem, filo, reino, animalid } = req.body;
+    const { classe, ordem, subordem, filo, reino } = req.body;
 
     // Verifica se os campos obrigatórios estão presentes
-    if (!classe || !ordem || !subordem || !filo || !reino || !animalid) {
+    if (!classe || !ordem || !subordem || !filo || !reino) {
         return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
     }
 
     const queryText = `
-        INSERT INTO taxonomia (classe, ordem, subordem, filo, reino, animalid)
-        VALUES ($1, $2, $3, $4, $5, $6)
+        INSERT INTO taxonomia (classe, ordem, subordem, filo, reino)
+        VALUES ($1, $2, $3, $4, $5)
         RETURNING *;
     `;
-    const queryValues = [classe, ordem, subordem, filo, reino, animalid];
+    const queryValues = [classe, ordem, subordem, filo, reino];
 
     try {
         const client = await pool.connect();
@@ -65,14 +65,14 @@ exports.deleteTaxonomia = async (req, res) => {
 // Atualização de uma taxonomia existente
 exports.updateTaxonomia = async (req, res) => {
     const { id } = req.params;
-    const { classe, ordem, subordem, filo, reino, animalid } = req.body;
+    const { classe, ordem, subordem, filo, reino } = req.body;
 
     if (!id) {
         return res.status(400).json({ error: 'ID da taxonomia é obrigatório' });
     }
 
     // Cria um objeto com os campos que podem ser atualizados
-    const fieldsToUpdate = { classe, ordem, subordem, filo, reino, animalid };
+    const fieldsToUpdate = { classe, ordem, subordem, filo, reino };
     const validFields = {};
 
     // Filtra apenas os campos válidos que foram fornecidos no corpo da requisição
