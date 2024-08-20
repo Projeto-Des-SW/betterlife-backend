@@ -22,6 +22,7 @@ router.get('/api/consultCep/:cep', userController.consultCep);
 router.post('/api/taxonomia', taxonomiaController.createTaxonomia);
 router.put('/api/deleteTaxonomia/:id', taxonomiaController.deleteTaxonomia);
 router.put('/api/updateTaxonomia/:id', taxonomiaController.updateTaxonomia);
+router.get('/api/getAllTaxonomia', taxonomiaController.getAllTaxonomia);
 
 router.post('/api/registerAnimal', animalController.addAnimal);
 router.put('/api/updateAnimal/:id', animalController.editAnimal);

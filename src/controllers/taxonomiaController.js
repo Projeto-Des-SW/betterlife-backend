@@ -23,7 +23,7 @@ exports.createTaxonomia = async (req, res) => {
 
         client.release();
 
-        return res.status(201).json(result.rows[0]);
+        return res.status(200).json(result.rows[0]);
     } catch (err) {
         console.error('Erro ao cadastrar taxonomia:', err);
         return res.status(500).json({ error: 'Erro ao cadastrar taxonomia' });
@@ -109,5 +109,24 @@ exports.updateTaxonomia = async (req, res) => {
     } catch (err) {
         console.error('Erro ao atualizar taxonomia:', err);
         return res.status(500).json({ error: 'Erro ao atualizar taxonomia' });
+    }
+};
+
+exports.getAllTaxonomia = async (req, res) => {
+    const queryText = `
+        SELECT * FROM taxonomia
+        WHERE deletado = false;
+    `;
+
+    try {
+        const client = await pool.connect();
+        const result = await client.query(queryText);
+
+        client.release();
+
+        return res.status(200).json(result.rows);
+    } catch (err) {
+        console.error('Erro ao buscar taxonomias:', err);
+        return res.status(500).json({ error: 'Erro ao buscar taxonomias' });
     }
 };
