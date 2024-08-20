@@ -2,6 +2,7 @@ const express = require('express');
 const router = new express.Router();
 const userController = require('../controllers/userController');
 const taxonomiaController = require('../controllers/taxonomiaController');
+const animalController = require('../controllers/animalController')
 const auth = require('../middlewares/authMiddleware');
 const cors = require('cors');
 
@@ -21,5 +22,9 @@ router.get('/api/consultCep/:cep', userController.consultCep);
 router.post('/api/taxonomia', taxonomiaController.createTaxonomia);
 router.put('/api/deleteTaxonomia/:id', taxonomiaController.deleteTaxonomia);
 router.put('/api/updateTaxonomia/:id', taxonomiaController.updateTaxonomia);
+
+router.post('/api/registerAnimal', animalController.addAnimal);
+router.put('/api/updateAnimal/:id', animalController.editAnimal);
+router.delete('/api/deleteAnimal/:id', animalController.deleteAnimal);
 
 module.exports = router;
