@@ -53,7 +53,7 @@ exports.editAnimal = async (req, res) => {
         queryValues.push(req.body[field]);
         queryText += `${field} = $${index + 1}, `;
     });
-    queryText = queryText.slice(0, -2); // Remove a última vírgula
+    queryText = queryText.slice(0, -2);
     queryText += ' WHERE id = $' + (updates.length + 1) + ' RETURNING *;';
     queryValues.push(id);
 
