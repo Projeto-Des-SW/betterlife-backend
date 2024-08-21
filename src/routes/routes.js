@@ -2,7 +2,8 @@ const express = require('express');
 const router = new express.Router();
 const userController = require('../controllers/userController');
 const taxonomiaController = require('../controllers/taxonomiaController');
-const animalController = require('../controllers/animalController')
+const animalController = require('../controllers/animalController');
+const imagemController = require('../controllers/imagensController');
 const auth = require('../middlewares/authMiddleware');
 const cors = require('cors');
 
@@ -24,8 +25,12 @@ router.put('/api/deleteTaxonomia/:id', taxonomiaController.deleteTaxonomia);
 router.put('/api/updateTaxonomia/:id', taxonomiaController.updateTaxonomia);
 router.get('/api/getAllTaxonomia', taxonomiaController.getAllTaxonomia);
 
+// Rotas para taxonomia
 router.post('/api/registerAnimal', animalController.addAnimal);
 router.put('/api/updateAnimal/:id', animalController.editAnimal);
 router.delete('/api/deleteAnimal/:id', animalController.deleteAnimal);
+
+//Definindo a rota para registrar uma nova imagem
+router.post('/api/registerImagem', imagemController.salvarFotos);
 
 module.exports = router;
