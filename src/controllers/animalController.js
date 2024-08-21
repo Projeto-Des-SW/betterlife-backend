@@ -2,7 +2,7 @@ const pool = require('../../config/db');
 
 // Adicionar animal
 exports.addAnimal = async (req, res) => {
-    const { nome, nomecientifico, sexo, peso, idade, descricao, observacaodaespecie, usuarioid, imagensid, somid, taxonomiaid } = req.body;
+    const { nome, nomecientifico, sexo, peso, idade, descricao, observacaodaespecie, usuarioid, imagemid, somid, taxonomiaid } = req.body;
 
     if (!nome || !nomecientifico || !sexo || !peso || !idade || !descricao || !observacaodaespecie || !usuarioid || !taxonomiaid) {
         return res.status(400).json({ 
@@ -15,16 +15,16 @@ exports.addAnimal = async (req, res) => {
         const client = await pool.connect();
 
         const queryText = `
-            INSERT INTO animal (nome, nomecientifico, sexo, peso, idade, descricao, observacaodaespecie, usuarioid, imagensid,  taxonomiaid)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+            INSERT INTO animal (nome, nomecientifico, sexo, peso, idade, descricao, observacaodaespecie, usuarioid, taxonomiaid)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             RETURNING *;
         `;
 
-        const result = await client.query(queryText, [nome, nomecientifico, sexo, peso, idade, descricao, observacaodaespecie, usuarioid, imagensid,  taxonomiaid]);
+        const result = await client.query(queryText, [nome, nomecientifico, sexo, peso, idade, descricao, observacaodaespecie, usuarioid, taxonomiaid]);
 
         client.release();
 
-        return res.status(201).json(result.rows[0]);
+        return res.status(200).json(result.rows[0]);
     } catch (err) {
         console.error('Erro ao adicionar animal:', err);
         return res.status(500).json({ error: 'Erro ao adicionar animal' });
@@ -53,7 +53,7 @@ exports.editAnimal = async (req, res) => {
         queryValues.push(req.body[field]);
         queryText += `${field} = $${index + 1}, `;
     });
-    queryText = queryText.slice(0, -2); // Remove a última vírgula
+    queryText = queryText.slice(0, -2);
     queryText += ' WHERE id = $' + (updates.length + 1) + ' RETURNING *;';
     queryValues.push(id);
 
