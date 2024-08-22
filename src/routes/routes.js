@@ -26,15 +26,17 @@ router.put('/api/deleteTaxonomia/:id', taxonomiaController.deleteTaxonomia);
 router.put('/api/updateTaxonomia/:id', taxonomiaController.updateTaxonomia);
 router.get('/api/getAllTaxonomia', taxonomiaController.getAllTaxonomia);
 
-// Rotas para taxonomia
+// Rotas para animal
 router.post('/api/registerAnimal', animalController.addAnimal);
 router.put('/api/updateAnimal/:id', animalController.editAnimal);
-router.delete('/api/deleteAnimal/:id', animalController.deleteAnimal);
+router.put('/api/deleteAnimal/:id', animalController.deleteAnimal);
 
 //Definindo a rota para registrar uma nova imagem
 router.post('/api/registerImagem', imagemController.salvarFotos);
 
 //Rotas para registrar som de um animal
 router.post('/api/registerSom', somController.salvarSom);
+router.put('/api/updateSom/:id', somController.updateSom);
+router.put('/api/deleteSom/:id', somController.deleteSom);
 
 module.exports = router;
