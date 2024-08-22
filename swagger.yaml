@@ -1,0 +1,260 @@
+openapi: 3.0.0
+info:
+  title: Betterlife API
+  version: 1.0.0
+  description: API da aplicação Betterlife gerencia dados relacionados a sons e taxonomias.
+
+servers:
+  - url: http://localhost:4000
+    description: Servidor local de desenvolvimento
+
+paths:
+  /api/registerSom:
+    post:
+      summary: Cria um novo som
+      description: Registra informações de um novo som no sistema.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                arquivosom:
+                  type: string
+                  description: Caminho do arquivo de som
+                  example: "path/to/som.mp3"
+                nomearquivo:
+                  type: string
+                  description: Nome do arquivo de som
+                  example: "som.mp3"
+                animalid:
+                  type: integer
+                  description: ID do animal associado ao som
+                  example: 1
+                datacriacao:
+                  type: string
+                  format: date-time
+                  description: Data e hora de criação do som
+                  example: "2024-08-21T14:00:00Z"
+                deletado:
+                  type: boolean
+                  description: Indica se o som está deletado
+                  example: false
+      responses:
+        '201':
+          description: Som criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Som'
+        '400':
+          description: Erro na requisição
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/deleteSom/{id}:
+    put:
+      summary: Deleta um som (deleção lógica)
+      description: Atualiza o status de deleção de um som para verdadeiro.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID do som a ser deletado
+          schema:
+            type: integer
+            example: 2
+      responses:
+        '200':
+          description: Som deletado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Som'
+        '404':
+          description: Som não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/updateSom/{id}:
+    put:
+      summary: Atualiza um som existente
+      description: Atualiza as informações de um som existente no sistema.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID do som a ser atualizado
+          schema:
+            type: integer
+            example: 3
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                arquivosom:
+                  type: string
+                  description: Caminho do arquivo de som
+                  example: "path/new/to/som.mp3"
+                nomearquivo:
+                  type: string
+                  description: Nome do arquivo de som
+                  example: "new_som.mp3"
+                datacriacao:
+                  type: string
+                  format: date-time
+                  description: Data e hora de atualização do som
+                  example: "2024-09-21T14:00:00Z"
+                animalid:
+                  type: integer
+                  description: ID do animal associado ao som
+                  example: 1
+                deletado:
+                  type: boolean
+                  description: Indica se o som está deletado
+                  example: false
+      responses:
+        '200':
+          description: Som atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Som'
+        '400':
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Som não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Erro ao atualizar som
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/taxonomia:
+    post:
+      summary: Cria uma nova taxonomia
+      description: Registra uma nova taxonomia no sistema.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - classe
+                - ordem
+                - subordem
+                - filo
+                - reino
+              properties:
+                classe:
+                  type: string
+                  description: Classe da taxonomia
+                  example: "Mammalia"
+                ordem:
+                  type: string
+                  description: Ordem da taxonomia
+                  example: "Carnivora"
+                subordem:
+                  type: string
+                  description: Subordem da taxonomia
+                  example: "Caniformia"
+                filo:
+                  type: string
+                  description: Filo da taxonomia
+                  example: "Chordata"
+                reino:
+                  type: string
+                  description: Reino da taxonomia
+                  example: "Animalia"
+      responses:
+        '200':
+          description: Taxonomia criada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Taxonomia'
+        '400':
+          description: Falta de dados necessários para a criação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Som:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        arquivosom:
+          type: string
+          example: "path/to/som.mp3"
+        nomearquivo:
+          type: string
+          example: "som.mp3"
+        animalid:
+          type: integer
+          example: 1
+        datacriacao:
+          type: string
+          format: date-time
+          example: "2024-08-21T14:00:00Z"
+        deletado:
+          type: boolean
+          example: false
+    Taxonomia:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        classe:
+          type: string
+          example: "Mammalia"
+        ordem:
+          type: string
+          example: "Carnivora"
+        subordem:
+          type: string
+          example: "Caniformia"
+        filo:
+          type: string
+          example: "Chordata"
+        reino:
+          type: string
+          example: "Animalia"
+        deletado:
+          type: boolean
+          example: false
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Erro ao processar a requisição"
