@@ -3,29 +3,26 @@ require('dotenv').config();
 
 // Função para salvar um novo som
 exports.salvarSom = async (req, res) => {
-  const { arquivosom, nomearquivo, animalid, datacriacao, deletado } = req.body;
+  const { arquivosom, nomearquivo } = req.body;
 
-  if (!arquivosom || !nomearquivo || !animalid) {
+  if (!arquivosom || !nomearquivo) {
     return res.status(400).json({ message: 'Campos obrigatórios ausentes' });
   }
 
   try {
     const query = `
-      INSERT INTO public.sons (arquivosom, nomearquivo, datacriacao, animalid, deletado)
-      VALUES ($1, $2, $3, $4, $5)
+      INSERT INTO public.sons (arquivosom, nomearquivo)
+      VALUES ($1, $2)
       RETURNING *;
     `;
 
     const values = [
       arquivosom,
       nomearquivo,
-      datacriacao || new Date(),
-      animalid,
-      deletado || false,
     ];
 
     const result = await pool.query(query, values);
-    res.status(201).json(result.rows[0]);
+    res.status(200).json(result.rows[0]);
   } catch (error) {
     res.status(400).json({ message: 'Erro ao salvar o som', error: error.message });
   }
@@ -63,13 +60,13 @@ exports.deleteSom = async (req, res) => {
 // Atualização de um som existente
 exports.updateSom = async (req, res) => {
   const { id } = req.params;
-  const { arquivosom, nomearquivo, datacriacao, animalid, deletado } = req.body;
+  const { arquivosom, nomearquivo } = req.body;
 
   if (!id) {
       return res.status(400).json({ error: 'ID do som é obrigatório' });
   }
 
-  const fieldsToUpdate = { arquivosom, nomearquivo, datacriacao, animalid, deletado };
+  const fieldsToUpdate = { arquivosom, nomearquivo };
   const validFields = {};
 
   for (let field in fieldsToUpdate) {
