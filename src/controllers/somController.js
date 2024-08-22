@@ -13,7 +13,7 @@ exports.salvarSom = async (req, res) => {
     const query = `
       INSERT INTO public.sons (arquivosom, nomearquivo)
       VALUES ($1, $2)
-      RETURNING *;
+      RETURNING id;
     `;
 
     const values = [
@@ -22,7 +22,7 @@ exports.salvarSom = async (req, res) => {
     ];
 
     const result = await pool.query(query, values);
-    res.status(200).json(result.rows[0]);
+    res.status(200).json({ id: result.rows[0].id });
   } catch (error) {
     res.status(400).json({ message: 'Erro ao salvar o som', error: error.message });
   }
