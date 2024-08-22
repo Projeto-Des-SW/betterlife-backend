@@ -4,6 +4,7 @@ const userController = require('../controllers/userController');
 const taxonomiaController = require('../controllers/taxonomiaController');
 const animalController = require('../controllers/animalController');
 const imagemController = require('../controllers/imagensController');
+const somController = require('../controllers/somController');
 const auth = require('../middlewares/authMiddleware');
 const cors = require('cors');
 
@@ -32,5 +33,8 @@ router.delete('/api/deleteAnimal/:id', animalController.deleteAnimal);
 
 //Definindo a rota para registrar uma nova imagem
 router.post('/api/registerImagem', imagemController.salvarFotos);
+
+//Rotas para registrar som de um animal
+router.post('/api/registerSom', somController.salvarSom);
 
 module.exports = router;
