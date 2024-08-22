@@ -102,3 +102,23 @@ exports.deleteAnimal = async (req, res) => {
         return res.status(500).json({ error: 'Erro ao deletar animal' });
     }
 };
+
+//Listar animais cadastrados
+exports.getAllAnimals = async (req, res) => {
+    const queryText = `
+        SELECT * FROM animal
+        WHERE deletado = false;
+    `;
+
+    try {
+        const client = await pool.connect();
+        const result = await client.query(queryText);
+
+        client.release();
+
+        return res.status(200).json(result.rows);
+    } catch (err) {
+        console.error('Erro ao buscar animais:', err);
+        return res.status(500).json({ error: 'Erro ao buscar animais' });
+    }
+};

@@ -30,6 +30,7 @@ router.get('/api/getAllTaxonomia', taxonomiaController.getAllTaxonomia);
 router.post('/api/registerAnimal', animalController.addAnimal);
 router.put('/api/updateAnimal/:id', animalController.editAnimal);
 router.put('/api/deleteAnimal/:id', animalController.deleteAnimal);
+router.get('/api/getAllAnimals', animalController.getAllAnimals);
 
 //Definindo a rota para registrar uma nova imagem
 router.post('/api/registerImagem', imagemController.salvarFotos);
