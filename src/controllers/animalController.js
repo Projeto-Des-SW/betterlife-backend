@@ -77,7 +77,7 @@ exports.editAnimal = async (req, res) => {
 
 // Deletar animal
 exports.deleteAnimal = async (req, res) => {
-    const { id } = req.body;
+    const { id } = req.params;
 
     if (!id) {
         return res.status(400).json({ error: 'ID do animal é obrigatório' });
