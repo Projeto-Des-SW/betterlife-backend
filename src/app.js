@@ -8,7 +8,7 @@ const swaggerDocument = YAML.load('./swagger.yaml');  // Ajuste o caminho confor
 const app = express();
 
 // Configuração do Swagger
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(express.json());
 
