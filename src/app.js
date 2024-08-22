@@ -10,7 +10,9 @@ const app = express();
 // Configuração do Swagger
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-app.use(express.json());
+//Limite da requisição
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Conexão com o banco de dados para teste
 pool.query('SELECT NOW()', (err, res) => {
