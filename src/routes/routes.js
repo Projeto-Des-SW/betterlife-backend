@@ -34,6 +34,9 @@ router.get('/api/getAllAnimals', animalController.getAllAnimals);
 
 //Definindo a rota para registrar uma nova imagem
 router.post('/api/registerImagem', imagemController.salvarFotos);
+router.put('/api/updateImagem/:id', imagemController.editaImagem);
+router.put('/api/deleteImagem/:id', imagemController.deletaImagem);
+
 
 //Rotas para registrar som de um animal
 router.post('/api/registerSom', somController.salvarSom);
