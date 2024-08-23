@@ -106,9 +106,37 @@ exports.deleteAnimal = async (req, res) => {
 //Listar animais cadastrados
 exports.getAllAnimals = async (req, res) => {
     const queryText = `
-        SELECT * FROM animal
-        WHERE deletado = false;
-    `;
+         SELECT 
+                a.id AS idAnimal, 
+                a.nome, 
+                a.nomecientifico, 
+                a.sexo, 
+                a.peso, 
+                a.idade, 
+                a.descricao,
+                a.observacaodaespecie,
+                s.id AS IdSom,
+                s.arquivosom, 
+                s.nomearquivo AS nomeArquivoSom,
+                i.arquivofoto,
+                i.id AS IdFoto,
+                i.nomearquivo AS nomeArquivoFoto,
+                t.id AS IdTaxonomia,
+                t.classe, 
+                t.ordem, 
+                t.subordem, 
+                t.filo, 
+                t.reino
+            FROM 
+                animal a
+            INNER JOIN 
+                sons s ON a.somid = s.id
+            INNER JOIN 
+                imagens i ON a.imagensid = i.id
+            INNER JOIN 
+                taxonomia t ON a.taxonomiaid = t.id
+            WHERE a.deletado = false;
+        `;
 
     try {
         const client = await pool.connect();
