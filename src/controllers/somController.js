@@ -1,5 +1,5 @@
-const pool = require('../../config/db'); 
-require('dotenv').config(); 
+const pool = require('../../config/db');
+require('dotenv').config();
 
 // Função para salvar um novo som
 exports.salvarSom = async (req, res) => {
@@ -9,16 +9,19 @@ exports.salvarSom = async (req, res) => {
     return res.status(400).json({ message: 'Campos obrigatórios ausentes' });
   }
 
+  const dataCriacao = new Date();
+  
   try {
     const query = `
-      INSERT INTO public.sons (arquivosom, nomearquivo)
-      VALUES ($1, $2)
+      INSERT INTO public.sons (arquivosom, nomearquivo, datacriacao)
+      VALUES ($1, $2, $3)
       RETURNING id;
     `;
 
     const values = [
       arquivosom,
       nomearquivo,
+      dataCriacao
     ];
 
     const result = await pool.query(query, values);
@@ -33,7 +36,7 @@ exports.deleteSom = async (req, res) => {
   const { id } = req.params;
 
   if (!id) {
-      return res.status(400).json({ error: 'ID do som é obrigatório' });
+    return res.status(400).json({ error: 'ID do som é obrigatório' });
   }
 
   const queryText = `
@@ -44,16 +47,16 @@ exports.deleteSom = async (req, res) => {
   `;
 
   try {
-      const result = await pool.query(queryText, [id]);
+    const result = await pool.query(queryText, [id]);
 
-      if (result.rows.length === 0) {
-          return res.status(404).json({ error: 'Som não encontrado' });
-      }
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Som não encontrado' });
+    }
 
-      return res.status(200).json(result.rows[0]);
+    return res.status(200).json(result.rows[0]);
   } catch (err) {
-      console.error('Erro ao deletar som:', err);
-      return res.status(500).json({ error: 'Erro ao deletar som' });
+    console.error('Erro ao deletar som:', err);
+    return res.status(500).json({ error: 'Erro ao deletar som' });
   }
 };
 
@@ -63,39 +66,42 @@ exports.updateSom = async (req, res) => {
   const { arquivosom, nomearquivo } = req.body;
 
   if (!id) {
-      return res.status(400).json({ error: 'ID do som é obrigatório' });
+    return res.status(400).json({ error: 'ID do som é obrigatório' });
   }
 
-  const fieldsToUpdate = { arquivosom, nomearquivo };
+  const dataalteracao = new Date();
+
+  const fieldsToUpdate = { arquivosom, nomearquivo, dataalteracao };
   const validFields = {};
 
   for (let field in fieldsToUpdate) {
-      if (fieldsToUpdate[field] !== undefined) {
-          validFields[field] = fieldsToUpdate[field];
-      }
+    if (fieldsToUpdate[field] !== undefined) {
+      validFields[field] = fieldsToUpdate[field];
+    }
   }
 
   if (Object.keys(validFields).length === 0) {
-      return res.status(400).json({ error: 'Nenhum campo válido para atualização' });
+    return res.status(400).json({ error: 'Nenhum campo válido para atualização' });
   }
 
   const setClause = Object.keys(validFields)
-      .map((field, index) => `${field} = $${index + 1}`)
-      .join(', ');
+    .map((field, index) => `${field} = $${index + 1}`)
+    .join(', ');
 
   const queryText = `UPDATE public.sons SET ${setClause} WHERE id = $${Object.keys(validFields).length + 1} RETURNING *;`;
   const queryValues = [...Object.values(validFields), id];
 
   try {
-      const result = await pool.query(queryText, queryValues);
+    const result = await pool.query(queryText, queryValues);
 
-      if (result.rows.length === 0) {
-          return res.status(404).json({ error: 'Som não encontrado' });
-      }
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Som não encontrado' });
+    }
 
-      return res.status(200).json(result.rows[0]);
+    return res.status(200).json(result.rows[0]);
   } catch (err) {
-      console.error('Erro ao atualizar som:', err);
-      return res.status(500).json({ error: 'Erro ao atualizar som' });
+    console.error('Erro ao atualizar som:', err);
+    return res.status(500).json({ error: 'Erro ao atualizar som' });
   }
 };
+
