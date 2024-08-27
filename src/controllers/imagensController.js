@@ -1,6 +1,5 @@
 const pool = require('../../config/db');
 
-
 exports.salvarFotos = async (req, res) => {
     const { animalId, arquivofoto, nomearquivo } = req.body;
 
@@ -14,13 +13,15 @@ exports.salvarFotos = async (req, res) => {
     try {
         const client = await pool.connect();
 
+        const dataCriacao = new Date();
+
         const queryText = `
             INSERT INTO imagens (animalid, arquivofoto, nomearquivo, datacriacao)
-            VALUES ($1, $2, $3, NOW())
+            VALUES ($1, $2, $3, $4)
             RETURNING *;
         `;
 
-        const result = await client.query(queryText, [animalId, arquivofoto, nomearquivo]);
+        const result = await client.query(queryText, [animalId, arquivofoto, nomearquivo, dataCriacao]);
 
         client.release();
 
@@ -31,7 +32,6 @@ exports.salvarFotos = async (req, res) => {
     }
 };
 
-//editar 
 exports.editaImagem = async (req, res) => {
     const { id, animalId, arquivofoto, nomearquivo } = req.body;
 
@@ -45,14 +45,16 @@ exports.editaImagem = async (req, res) => {
     try {
         const client = await pool.connect();
 
+        const dataAlteracao = new Date();
+
         const queryText = `
             UPDATE imagens
-            SET animalid = $2, arquivofoto = $3, nomearquivo = $4, datacriacao = NOW()
+            SET animalid = $2, arquivofoto = $3, nomearquivo = $4, dataalteracao = $5
             WHERE id = $1 AND deletado = false
             RETURNING *;
         `;
 
-        const result = await client.query(queryText, [id, animalId, arquivofoto, nomearquivo]);
+        const result = await client.query(queryText, [id, animalId, arquivofoto, nomearquivo, dataAlteracao]);
 
         client.release();
 
@@ -67,7 +69,6 @@ exports.editaImagem = async (req, res) => {
     }
 };
 
-//deletar
 exports.deletaImagem = async (req, res) => {
     const { id } = req.params;
 
@@ -81,14 +82,16 @@ exports.deletaImagem = async (req, res) => {
     try {
         const client = await pool.connect();
 
+        const dataAlteracao = new Date();
+
         const queryText = `
             UPDATE imagens
-            SET deletado = true
-            WHERE id = $1
+            SET deletado = true, dataalteracao = $1
+            WHERE id = $2
             RETURNING *;
         `;
 
-        const result = await client.query(queryText, [id]);
+        const result = await client.query(queryText, [dataAlteracao, id]);
 
         client.release();
 

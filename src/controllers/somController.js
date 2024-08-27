@@ -1,7 +1,6 @@
 const pool = require('../../config/db');
 require('dotenv').config();
 
-// Função para salvar um novo som
 exports.salvarSom = async (req, res) => {
   const { arquivosom, nomearquivo } = req.body;
 
@@ -31,7 +30,6 @@ exports.salvarSom = async (req, res) => {
   }
 };
 
-// Deleção lógica de um som (definindo o campo "deletado" como true)
 exports.deleteSom = async (req, res) => {
   const { id } = req.params;
 
@@ -39,15 +37,17 @@ exports.deleteSom = async (req, res) => {
     return res.status(400).json({ error: 'ID do som é obrigatório' });
   }
 
+  const dataAlteracao = new Date();
+
   const queryText = `
       UPDATE public.sons
-      SET deletado = true
-      WHERE id = $1
+      SET deletado = true, dataalteracao = $1
+      WHERE id = $2
       RETURNING *;
   `;
 
   try {
-    const result = await pool.query(queryText, [id]);
+    const result = await pool.query(queryText, [dataAlteracao, id]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Som não encontrado' });
@@ -60,7 +60,6 @@ exports.deleteSom = async (req, res) => {
   }
 };
 
-// Atualização de um som existente
 exports.updateSom = async (req, res) => {
   const { id } = req.params;
   const { arquivosom, nomearquivo } = req.body;
