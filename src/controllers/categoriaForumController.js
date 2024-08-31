@@ -108,21 +108,21 @@ exports.createCategoriaForum = async (req, res) => {
 //     }
 // };
 
-// exports.getAllCategoriaForum = async (req, res) => {
-//     const queryText = `
-//         SELECT * FROM taxonomia
-//         WHERE deletado = false;
-//     `;
+exports.getAllCategoriaForum = async (req, res) => {
+    const queryText = `
+        SELECT * FROM categoriaforums
+        WHERE deletado = false OR deletado is null;
+    `;
 
-//     try {
-//         const client = await pool.connect();
-//         const result = await client.query(queryText);
+    try {
+        const client = await pool.connect();
+        const result = await client.query(queryText);
 
-//         client.release();
+        client.release();
 
-//         return res.status(200).json(result.rows);
-//     } catch (err) {
-//         console.error('Erro ao buscar taxonomias:', err);
-//         return res.status(500).json({ error: 'Erro ao buscar taxonomias' });
-//     }
-// };
+        return res.status(200).json(result.rows);
+    } catch (err) {
+        console.error('Erro ao buscar taxonomias:', err);
+        return res.status(500).json({ error: 'Erro ao buscar taxonomias' });
+    }
+};
