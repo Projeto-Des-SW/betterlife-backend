@@ -3,7 +3,7 @@ const routes = require('./routes/routes');
 const pool = require('../config/db');
 const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
-const swaggerDocument = YAML.load('./swagger.yaml');  // Ajuste o caminho conforme necessário
+const swaggerDocument = YAML.load('./swagger.yaml');
 
 const app = express();
 
