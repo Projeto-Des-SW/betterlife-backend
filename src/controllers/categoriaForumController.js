@@ -24,40 +24,40 @@ exports.createCategoriaForum = async (req, res) => {
         return res.status(200).json(result.rows[0]);
     } catch (err) {
         console.error('Erro ao cadastrar categoria de fórum:', err);
-        return res.status(500).json({ error: 'Erro ao cadastrar taxonomia' });
+        return res.status(500).json({ error: 'Erro ao cadastrar categoria de fórum' });
     }
 };
 
-// exports.deleteCategoriaForum = async (req, res) => {
-//     const { id } = req.params;
+exports.deleteCategoriaForum = async (req, res) => {
+    const { id } = req.params;
 
-//     if (!id) {
-//         return res.status(400).json({ error: 'ID da taxonomia é obrigatório' });
-//     }
+    if (!id) {
+        return res.status(400).json({ error: 'ID da categoria de fórum é obrigatório' });
+    }
 
-//     const queryText = `
-//         UPDATE taxonomia
-//         SET deletado = true
-//         WHERE id = $1
-//         RETURNING *;
-//     `;
+    const queryText = `
+        UPDATE categoriaforums
+        SET deletado = true
+        WHERE id = $1
+        RETURNING *;
+    `;
 
-//     try {
-//         const client = await pool.connect();
-//         const result = await client.query(queryText, [id]);
+    try {
+        const client = await pool.connect();
+        const result = await client.query(queryText, [id]);
 
-//         client.release();
+        client.release();
 
-//         if (result.rows.length === 0) {
-//             return res.status(404).json({ error: 'Taxonomia não encontrada' });
-//         }
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Categoria de fórum não encontrada' });
+        }
 
-//         return res.status(200).json(result.rows[0]);
-//     } catch (err) {
-//         console.error('Erro ao deletar taxonomia:', err);
-//         return res.status(500).json({ error: 'Erro ao deletar taxonomia' });
-//     }
-// };
+        return res.status(200).json(result.rows[0]);
+    } catch (err) {
+        console.error('Erro ao deletar categoria de fórum:', err);
+        return res.status(500).json({ error: 'Erro ao deletar categoria de fórum' });
+    }
+};
 
 exports.updateCategoriaForum = async (req, res) => {
     const { id } = req.params;
