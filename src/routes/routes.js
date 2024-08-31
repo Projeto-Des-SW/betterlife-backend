@@ -47,5 +47,6 @@ router.put('/api/deleteSom/:id', somController.deleteSom);
 router.post('/api/registerCategoryForum', categoriaForumController.createCategoriaForum);
 router.get('/api/getAllCategoriaForum', categoriaForumController.getAllCategoriaForum);
 router.put('/api/updateCategoriaForum/:id', categoriaForumController.updateCategoriaForum);
+router.put('/api/deleteCategoriaForum/:id', categoriaForumController.deleteCategoriaForum);
 
 module.exports = router;
