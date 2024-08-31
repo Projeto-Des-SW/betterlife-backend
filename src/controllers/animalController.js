@@ -4,7 +4,7 @@ const pool = require('../../config/db');
 exports.addAnimal = async (req, res) => {
     const { nome, nomecientifico, sexo, peso, idade, descricao, observacaodaespecie, usuarioid, imagemid, somid, taxonomiaid } = req.body;
 
-    if (!nome || !nomecientifico || !sexo || !peso || !idade || !descricao || !observacaodaespecie || !usuarioid || !taxonomiaid) {
+    if (!nome || !nomecientifico || !sexo || !peso || !idade || !descricao || !observacaodaespecie || !usuarioid || !taxonomiaid || !imagemid || !somid) {
         return res.status(400).json({ 
             error: 'Todos os campos obrigatórios devem ser preenchidos.',
             dados: req.body
@@ -15,12 +15,12 @@ exports.addAnimal = async (req, res) => {
         const client = await pool.connect();
 
         const queryText = `
-            INSERT INTO animal (nome, nomecientifico, sexo, peso, idade, descricao, observacaodaespecie, usuarioid, taxonomiaid)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            INSERT INTO animal (nome, nomecientifico, sexo, peso, idade, descricao, observacaodaespecie, usuarioid, taxonomiaid, imagensid, somid)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
             RETURNING *;
         `;
 
-        const result = await client.query(queryText, [nome, nomecientifico, sexo, peso, idade, descricao, observacaodaespecie, usuarioid, taxonomiaid]);
+        const result = await client.query(queryText, [nome, nomecientifico, sexo, peso, idade, descricao, observacaodaespecie, usuarioid, taxonomiaid, imagemid, somid]);
 
         client.release();
 
