@@ -59,54 +59,50 @@ exports.createCategoriaForum = async (req, res) => {
 //     }
 // };
 
-// exports.updateCategoriaForum = async (req, res) => {
-//     const { id } = req.params;
-//     const { classe, ordem, subordem, filo, reino } = req.body;
+exports.updateCategoriaForum = async (req, res) => {
+    const { id } = req.params;
+    const { nome, descricao } = req.body;
 
-//     if (!id) {
-//         return res.status(400).json({ error: 'ID da taxonomia é obrigatório' });
-//     }
+    if (!id) {
+        return res.status(400).json({ error: 'ID da categoria é obrigatório' });
+    }
 
-//     // Cria um objeto com os campos que podem ser atualizados
-//     const fieldsToUpdate = { classe, ordem, subordem, filo, reino };
-//     const validFields = {};
+    const fieldsToUpdate = { nome, descricao };
+    const validFields = {};
 
-//     // Filtra apenas os campos válidos que foram fornecidos no corpo da requisição
-//     for (let field in fieldsToUpdate) {
-//         if (fieldsToUpdate[field] !== undefined) {
-//             validFields[field] = fieldsToUpdate[field];
-//         }
-//     }
+    for (let field in fieldsToUpdate) {
+        if (fieldsToUpdate[field] !== undefined) {
+            validFields[field] = fieldsToUpdate[field];
+        }
+    }
 
-//     // Se nenhum campo válido foi fornecido, retorna um erro
-//     if (Object.keys(validFields).length === 0) {
-//         return res.status(400).json({ error: 'Nenhum campo válido para atualização' });
-//     }
+    if (Object.keys(validFields).length === 0) {
+        return res.status(400).json({ error: 'Nenhum campo válido para atualização' });
+    }
 
-//     // Constrói a query dinamicamente
-//     const setClause = Object.keys(validFields)
-//         .map((field, index) => `${field} = $${index + 1}`)
-//         .join(', ');
+    const setClause = Object.keys(validFields)
+        .map((field, index) => `${field} = $${index + 1}`)
+        .join(', ');
 
-//     const queryText = `UPDATE taxonomia SET ${setClause} WHERE id = $${Object.keys(validFields).length + 1} RETURNING *;`;
-//     const queryValues = [...Object.values(validFields), id];
+    const queryText = `UPDATE categoriaforums SET ${setClause} WHERE id = $${Object.keys(validFields).length + 1} RETURNING *;`;
+    const queryValues = [...Object.values(validFields), id];
 
-//     try {
-//         const client = await pool.connect();
-//         const result = await client.query(queryText, queryValues);
+    try {
+        const client = await pool.connect();
+        const result = await client.query(queryText, queryValues);
 
-//         client.release();
+        client.release();
 
-//         if (result.rows.length === 0) {
-//             return res.status(404).json({ error: 'Taxonomia não encontrada' });
-//         }
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Categoria de fórum não encontrada' });
+        }
 
-//         return res.status(200).json(result.rows[0]);
-//     } catch (err) {
-//         console.error('Erro ao atualizar taxonomia:', err);
-//         return res.status(500).json({ error: 'Erro ao atualizar taxonomia' });
-//     }
-// };
+        return res.status(200).json(result.rows[0]);
+    } catch (err) {
+        console.error('Erro ao atualizar categoria de fórum:', err);
+        return res.status(500).json({ error: 'Erro ao atualizar categoria de fórum' });
+    }
+};
 
 exports.getAllCategoriaForum = async (req, res) => {
     const queryText = `
