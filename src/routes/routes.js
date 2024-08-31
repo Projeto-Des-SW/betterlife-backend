@@ -5,6 +5,7 @@ const taxonomiaController = require('../controllers/taxonomiaController');
 const animalController = require('../controllers/animalController');
 const imagemController = require('../controllers/imagensController');
 const somController = require('../controllers/somController');
+const categoriaForumController = require('../controllers/categoriaForumController')
 const auth = require('../middlewares/authMiddleware');
 const cors = require('cors');
 
@@ -41,5 +42,8 @@ router.put('/api/deleteImagem/:id', imagemController.deletaImagem);
 router.post('/api/registerSom', somController.salvarSom);
 router.put('/api/updateSom/:id', somController.updateSom);
 router.put('/api/deleteSom/:id', somController.deleteSom);
+
+//Rotas para categorias de fóruns
+router.post('/api/registerCategoryForum', categoriaForumController.createCategoriaForum);
 
 module.exports = router;
