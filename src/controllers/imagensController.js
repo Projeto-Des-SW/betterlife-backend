@@ -18,7 +18,7 @@ exports.salvarFotos = async (req, res) => {
         const queryText = `
             INSERT INTO imagens (arquivofoto, nomearquivo, datacriacao)
             VALUES ($1, $2, $3)
-            RETURNING *;
+            RETURNING id;
         `;
 
         const result = await client.query(queryText, [arquivofoto, nomearquivo, dataCriacao]);
