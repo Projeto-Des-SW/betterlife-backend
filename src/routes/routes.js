@@ -6,6 +6,8 @@ const animalController = require('../controllers/animalController');
 const imagemController = require('../controllers/imagensController');
 const somController = require('../controllers/somController');
 const categoriaForumController = require('../controllers/categoriaForumController')
+const forumController = require('../controllers/forumController')
+
 const auth = require('../middlewares/authMiddleware');
 const cors = require('cors');
 
@@ -48,5 +50,13 @@ router.post('/api/registerCategoryForum', categoriaForumController.createCategor
 router.get('/api/getAllCategoriaForum', categoriaForumController.getAllCategoriaForum);
 router.put('/api/updateCategoriaForum/:id', categoriaForumController.updateCategoriaForum);
 router.put('/api/deleteCategoriaForum/:id', categoriaForumController.deleteCategoriaForum);
+
+//Rotas para post do fóruns
+router.post('/api/registerForum', forumController.cadastrarPost);
+router.get('/api/getAllForum', forumController.listarPosts);
+router.put('/api/updateForum/:id', forumController.editarPost);
+router.put('/api/deleteForum/:id', forumController.deletarPost);
+
+
 
 module.exports = router;
