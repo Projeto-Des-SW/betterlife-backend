@@ -43,7 +43,7 @@ router.delete('/api/deleteImagem/:id', imagemController.deletaImagem);
 //Rotas para registrar som de um animal
 router.post('/api/registerSom', somController.salvarSom);
 router.put('/api/updateSom/:id', somController.updateSom);
-router.put('/api/deleteSom/:id', somController.deleteSom);
+router.delete('/api/deleteSom/:id', somController.deleteSom);
 
 //Rotas para categorias de fóruns
 router.post('/api/registerCategoryForum', categoriaForumController.createCategoriaForum);

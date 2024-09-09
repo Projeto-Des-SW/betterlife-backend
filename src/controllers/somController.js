@@ -40,9 +40,8 @@ exports.deleteSom = async (req, res) => {
   const dataAlteracao = new Date();
 
   const queryText = `
-      UPDATE public.sons
-      SET deletado = true, dataalteracao = $1
-      WHERE id = $2
+      DELETE FROM sons
+      WHERE id = $1
       RETURNING *;
   `;
 
