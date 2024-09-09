@@ -1,12 +1,12 @@
 const pool = require('../../config/db');
 
 exports.salvarFotos = async (req, res) => {
-    const {arquivofoto, nomearquivo } = req.body;
+    const { arquivofoto, nomearquivo } = req.body;
 
     if (!arquivofoto || !nomearquivo) {
-        return res.status(400).json({ 
-            error: 'Arquivo da foto e nome do arquivo são obrigatórios.', 
-            dados: req.body 
+        return res.status(400).json({
+            error: 'Arquivo da foto e nome do arquivo são obrigatórios.',
+            dados: req.body
         });
     }
 
@@ -36,9 +36,9 @@ exports.editaImagem = async (req, res) => {
     const { id, animalId, arquivofoto, nomearquivo } = req.body;
 
     if (!id || !animalId || !arquivofoto || !nomearquivo) {
-        return res.status(400).json({ 
-            error: 'ID da imagem, ID do animal, arquivo da foto e nome do arquivo são obrigatórios.', 
-            dados: req.body 
+        return res.status(400).json({
+            error: 'ID da imagem, ID do animal, arquivo da foto e nome do arquivo são obrigatórios.',
+            dados: req.body
         });
     }
 
@@ -73,25 +73,22 @@ exports.deletaImagem = async (req, res) => {
     const { id } = req.params;
 
     if (!id) {
-        return res.status(400).json({ 
-            error: 'ID da imagem é obrigatório.', 
-            dados: req.body 
+        return res.status(400).json({
+            error: 'ID da imagem é obrigatório.',
+            dados: req.body
         });
     }
 
     try {
         const client = await pool.connect();
 
-        const dataAlteracao = new Date();
-
         const queryText = `
-            UPDATE imagens
-            SET deletado = true, dataalteracao = $1
-            WHERE id = $2
+            DELETE FROM imagens
+            WHERE id = $1
             RETURNING *;
         `;
 
-        const result = await client.query(queryText, [dataAlteracao, id]);
+        const result = await client.query(queryText, [id]);
 
         client.release();
 
