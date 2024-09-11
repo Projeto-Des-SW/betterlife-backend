@@ -30,10 +30,16 @@ exports.cadastrarPost = async (req, res) => {
 
 exports.listarPosts = async (req, res) => {
     const queryText = `
-        SELECT * FROM forum
-        WHERE deletado = false OR deletado IS NULL;
+       SELECT 
+            f.*, 
+            cf.nome AS nomeCategoria, 
+            cf.descricao AS descricaoCategoria
+        FROM forum f
+        INNER JOIN 
+            categoriaforums cf ON f.categoriaforumid = cf.id
+        WHERE f.deletado = false OR f.deletado IS NULL;
     `;
-
+    
     try {
         const client = await pool.connect();
         const result = await client.query(queryText);
@@ -128,9 +134,14 @@ exports.listarPostsPorUsuario = async (req, res) => {
     const { id } = req.params;
     
     const queryText = `
-        SELECT * FROM forum
-        WHERE (deletado = false OR deletado IS NULL)
-        AND usuarioidpergunta = $1;
+       SELECT 
+            f.*, 
+            cf.nome AS nomeCategoria, 
+            cf.descricao AS descricaoCategoria
+        FROM forum f
+        INNER JOIN 
+            categoriaforums cf ON f.categoriaforumid = cf.id
+        WHERE (deletado = false OR deletado IS NULL) AND usuarioidpergunta = $1;
     `;
 
     try {
@@ -150,9 +161,14 @@ exports.listarRespostasForum = async (req, res) => {
     const { id } = req.params;
     
     const queryText = `
-        SELECT * FROM forum
-        WHERE (deletado = false OR deletado IS NULL)
-        AND usuarioidresposta = $1;
+       SELECT 
+            f.*, 
+            cf.nome AS nomeCategoria, 
+            cf.descricao AS descricaoCategoria
+        FROM forum f
+        INNER JOIN 
+            categoriaforums cf ON f.categoriaforumid = cf.id
+        WHERE (deletado = false OR deletado IS NULL) AND usuarioidresposta = $1;
     `;
 
     try {
@@ -171,7 +187,13 @@ exports.listarRespostasForum = async (req, res) => {
 exports.buscarPostPorId = async (req, res) => {
     const postId = req.params.id;  
     const queryText = `
-        SELECT * FROM forum
+        SELECT 
+            f.*, 
+            cf.nome AS nomeCategoria, 
+            cf.descricao AS descricaoCategoria
+        FROM forum f
+        INNER JOIN 
+            categoriaforums cf ON f.categoriaforumid = cf.id
         WHERE id = $1 AND (deletado = false OR deletado IS NULL);
     `;
 
