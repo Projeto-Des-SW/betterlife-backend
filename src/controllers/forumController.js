@@ -125,7 +125,7 @@ exports.deletarPost = async (req, res) => {
 
 exports.listarPostsPorUsuario = async (req, res) => {
     
-    const { id } = req.params; // Obtém o ID do usuário a partir dos parâmetros da URL
+    const { id } = req.params;
     
     const queryText = `
         SELECT * FROM forum
@@ -135,7 +135,7 @@ exports.listarPostsPorUsuario = async (req, res) => {
 
     try {
         const client = await pool.connect();
-        const result = await client.query(queryText, [id]); // Passa o ID do usuário como parâmetro da consulta
+        const result = await client.query(queryText, [id]);
 
         client.release();
 
@@ -143,5 +143,51 @@ exports.listarPostsPorUsuario = async (req, res) => {
     } catch (err) {
         console.error('Erro ao listar posts por usuário:', err);
         return res.status(500).json({ error: 'Erro ao listar posts por usuário' });
+    }
+};
+
+exports.listarRespostasForum = async (req, res) => {
+    const { id } = req.params;
+    
+    const queryText = `
+        SELECT * FROM forum
+        WHERE (deletado = false OR deletado IS NULL)
+        AND usuarioidresposta = $1;
+    `;
+
+    try {
+        const client = await pool.connect();
+        const result = await client.query(queryText, [id]);
+
+        client.release();
+
+        return res.status(200).json(result.rows);
+    } catch (err) {
+        console.error('Erro ao listar posts por usuário:', err);
+        return res.status(500).json({ error: 'Erro ao listar posts por usuário' });
+    }
+};
+
+exports.buscarPostPorId = async (req, res) => {
+    const postId = req.params.id;  
+    const queryText = `
+        SELECT * FROM forum
+        WHERE id = $1 AND (deletado = false OR deletado IS NULL);
+    `;
+
+    try {
+        const client = await pool.connect();
+        const result = await client.query(queryText, [postId]);
+
+        client.release();
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Post não encontrado' });
+        }
+
+        return res.status(200).json(result.rows[0]);
+    } catch (err) {
+        console.error('Erro ao buscar post por ID:', err);
+        return res.status(500).json({ error: 'Erro ao buscar post por ID' });
     }
 };
