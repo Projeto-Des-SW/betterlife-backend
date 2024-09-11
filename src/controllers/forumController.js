@@ -167,3 +167,27 @@ exports.listarRespostasForum = async (req, res) => {
         return res.status(500).json({ error: 'Erro ao listar posts por usuário' });
     }
 };
+
+exports.buscarPostPorId = async (req, res) => {
+    const postId = req.params.id;  
+    const queryText = `
+        SELECT * FROM forum
+        WHERE id = $1 AND (deletado = false OR deletado IS NULL);
+    `;
+
+    try {
+        const client = await pool.connect();
+        const result = await client.query(queryText, [postId]);
+
+        client.release();
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Post não encontrado' });
+        }
+
+        return res.status(200).json(result.rows[0]);
+    } catch (err) {
+        console.error('Erro ao buscar post por ID:', err);
+        return res.status(500).json({ error: 'Erro ao buscar post por ID' });
+    }
+};
