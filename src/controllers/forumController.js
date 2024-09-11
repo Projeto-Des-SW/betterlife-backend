@@ -146,14 +146,13 @@ exports.listarPostsPorUsuario = async (req, res) => {
     }
 };
 
-exports.listarPostsPorUsuario = async (req, res) => {
-    
+exports.listarRespostasForum = async (req, res) => {
     const { id } = req.params;
     
     const queryText = `
         SELECT * FROM forum
         WHERE (deletado = false OR deletado IS NULL)
-        AND usuarioidpergunta = $1;
+        AND usuarioidresposta = $1;
     `;
 
     try {
