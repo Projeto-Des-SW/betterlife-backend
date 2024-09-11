@@ -122,3 +122,27 @@ exports.deletarPost = async (req, res) => {
         return res.status(500).json({ error: 'Erro ao deletar post' });
     }
 };
+
+exports.listarRespostasForum = async (req, res) => {
+    const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).json({ error: 'ID do usuário é obrigatório' });
+    }
+    const queryText = `
+        SELECT * FROM forum
+        WHERE deletado = false OR deletado IS NULL AND usuarioidresposta = $1;
+    `;
+
+    try {
+        const client = await pool.connect();
+        const result = await client.query(queryText, [id]);
+
+        client.release();
+
+        return res.status(200).json(result.rows);
+    } catch (err) {
+        console.error('Erro ao listar posts:', err);
+        return res.status(500).json({ error: 'Erro ao listar posts' });
+    }
+};
