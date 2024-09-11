@@ -57,6 +57,7 @@ router.get('/api/getAllForum', forumController.listarPosts);
 router.put('/api/updateForum/:id', forumController.editarPost);
 router.put('/api/deleteForum/:id', forumController.deletarPost);
 router.get('/api/getRespondForum/:id', forumController.listarRespostasForum);
+router.get('/api/getAllForumByUser/:id', forumController.listarPostsPorUsuario);
 
 
 module.exports = router;

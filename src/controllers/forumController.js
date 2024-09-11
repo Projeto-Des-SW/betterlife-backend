@@ -123,15 +123,14 @@ exports.deletarPost = async (req, res) => {
     }
 };
 
-exports.listarRespostasForum = async (req, res) => {
+exports.listarPostsPorUsuario = async (req, res) => {
+    
     const { id } = req.params;
-
-    if (!id) {
-        return res.status(400).json({ error: 'ID do usuário é obrigatório' });
-    }
+    
     const queryText = `
         SELECT * FROM forum
-        WHERE deletado = false OR deletado IS NULL AND usuarioidresposta = $1;
+        WHERE (deletado = false OR deletado IS NULL)
+        AND usuarioidpergunta = $1;
     `;
 
     try {
@@ -142,7 +141,30 @@ exports.listarRespostasForum = async (req, res) => {
 
         return res.status(200).json(result.rows);
     } catch (err) {
-        console.error('Erro ao listar posts:', err);
-        return res.status(500).json({ error: 'Erro ao listar posts' });
+        console.error('Erro ao listar posts por usuário:', err);
+        return res.status(500).json({ error: 'Erro ao listar posts por usuário' });
+    }
+};
+
+exports.listarPostsPorUsuario = async (req, res) => {
+    
+    const { id } = req.params;
+    
+    const queryText = `
+        SELECT * FROM forum
+        WHERE (deletado = false OR deletado IS NULL)
+        AND usuarioidpergunta = $1;
+    `;
+
+    try {
+        const client = await pool.connect();
+        const result = await client.query(queryText, [id]);
+
+        client.release();
+
+        return res.status(200).json(result.rows);
+    } catch (err) {
+        console.error('Erro ao listar posts por usuário:', err);
+        return res.status(500).json({ error: 'Erro ao listar posts por usuário' });
     }
 };
