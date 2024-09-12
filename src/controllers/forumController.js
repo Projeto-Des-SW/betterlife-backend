@@ -141,7 +141,7 @@ exports.listarPostsPorUsuario = async (req, res) => {
         FROM forum f
         INNER JOIN 
             categoriaforums cf ON f.categoriaforumid = cf.id
-        WHERE (deletado = false OR deletado IS NULL) AND usuarioidpergunta = $1;
+        WHERE f.deletado = false OR f.deletado IS NULL AND f.usuarioidpergunta = $1;
     `;
 
     try {
@@ -168,7 +168,7 @@ exports.listarRespostasForum = async (req, res) => {
         FROM forum f
         INNER JOIN 
             categoriaforums cf ON f.categoriaforumid = cf.id
-        WHERE (deletado = false OR deletado IS NULL) AND usuarioidresposta = $1;
+        WHERE f.deletado = false OR f.deletado IS NULL AND f.usuarioidresposta = $1;
     `;
 
     try {
@@ -194,7 +194,7 @@ exports.buscarPostPorId = async (req, res) => {
         FROM forum f
         INNER JOIN 
             categoriaforums cf ON f.categoriaforumid = cf.id
-        WHERE id = $1 AND (deletado = false OR deletado IS NULL);
+        WHERE f.id = $1 AND (f.deletado = false OR f.deletado IS NULL);
     `;
 
     try {
