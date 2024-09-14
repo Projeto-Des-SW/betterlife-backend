@@ -7,6 +7,7 @@ const imagemController = require('../controllers/imagensController');
 const somController = require('../controllers/somController');
 const categoriaForumController = require('../controllers/categoriaForumController')
 const forumController = require('../controllers/forumController')
+const comunidadeContrller = require('../controllers/comunindadeController')
 
 const auth = require('../middlewares/authMiddleware');
 const cors = require('cors');
@@ -58,5 +59,11 @@ router.put('/api/updateForum/:id', forumController.editarPost);
 router.put('/api/deleteForum/:id', forumController.deletarPost);
 router.get('/api/getAllRespondForum/:id', forumController.listarRespostasForum);
 router.get('/api/getAllForumByUser/:id', forumController.listarPostsPorUsuario);
+router.get('/api/getAllForumByPostId/:id', forumController.buscarPostPorId);
+
+//Rotas para cominidade 
+router.post('api/registerCominidade' , comunidadeContrller.cadastrarComunidade);
+router.put('api/deletarCominidade/:id' , comunidadeContrller.deletarComunidade);
+router.get('api/getAllCominidade' , comunidadeContrller.listarComunidades);
 
 module.exports = router;
