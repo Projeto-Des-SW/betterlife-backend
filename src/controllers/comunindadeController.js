@@ -4,7 +4,6 @@ require('dotenv').config();
 exports.cadastrarComunidade = async (req, res) => {
     const { nome, descricao, enderecoid, responsavel, telefone, usuarioid } = req.body;
 
-    // Validação de campos obrigatórios
     if (!nome || !usuarioid) {
         return res.status(400).json({ error: 'Os campos obrigatórios não foram preenchidos' });
     }
@@ -79,3 +78,46 @@ exports.deletarComunidade = async (req, res) => {
         return res.status(500).json({ error: 'Erro ao deletar comunidade' });
     }
 };
+
+exports.atualizarComunidade = async (req, res) => {
+    const { id } = req.params;
+    const { nome, descricao, responsavel, telefone } = req.body;
+
+    if (!id) {
+        return res.status(400).json({ error: 'O ID da comunidade é obrigatório' });
+    }
+
+    const allowedUpdates = ['nome', 'descricao', 'responsavel', 'telefone'];
+    const updates = Object.keys(req.body).filter(update => allowedUpdates.includes(update));
+
+    if (updates.length === 0) {
+        return res.status(400).json({ error: 'Nenhum campo válido para atualização' });
+    }
+
+    let queryText = 'UPDATE comunidade SET ';
+    const queryValues = [];
+    updates.forEach((field, index) => {
+        queryValues.push(req.body[field]);
+        queryText += `${field} = $${index + 1}, `;
+    });
+    queryText = queryText.slice(0, -2);
+    queryText += ' WHERE id = $' + (updates.length + 1) + ' RETURNING *;';
+    queryValues.push(id);
+
+    try {
+        const client = await pool.connect();
+        const result = await client.query(queryText, queryValues);
+        
+        client.release();
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Comunidade não encontrada' });
+        }
+
+        return res.status(200).json({ message: 'Comunidade deletada com sucesso', comunidade: result.rows[0] });
+    } catch (err) {
+        console.error('Erro ao deletar comunidade:', err);
+        return res.status(500).json({ error: 'Erro ao deletar comunidade' });
+    }
+};
+
