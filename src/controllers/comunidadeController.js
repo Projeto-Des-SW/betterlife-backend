@@ -30,8 +30,27 @@ exports.cadastrarComunidade = async (req, res) => {
 
 exports.listarComunidades = async (req, res) => {
     const queryText = `
-        SELECT * FROM comunidade
-        WHERE deletado = false
+         SELECT 
+            c.id,
+            c.nome,
+            c.descricao,
+            c.responsavel,
+            c.telefone,
+            c.deletado as deletadoComunidade,
+            c.enderecoid,
+            e.cep, 
+            e.logradouro, 
+            e.bairro, 
+            e.uf, 
+            e.pais, 
+            e.complemento, 
+            e.numero, 
+            e.cidade,
+            e.deletado as deletadoEndereco
+        FROM comunidade c
+        INNER JOIN 
+            endereco e ON c.enderecoid = e.id
+        WHERE c.deletado = false
         ORDER BY id ASC;
     `;
 
@@ -107,7 +126,7 @@ exports.atualizarComunidade = async (req, res) => {
     try {
         const client = await pool.connect();
         const result = await client.query(queryText, queryValues);
-        
+
         client.release();
 
         if (result.rowCount === 0) {
@@ -129,8 +148,27 @@ exports.listarComunidadesCriadaPorUsuario = async (req, res) => {
     }
 
     const queryText = `
-        SELECT * FROM comunidade
-        WHERE deletado = false and usuarioid = $1
+          SELECT 
+            c.id,
+            c.nome,
+            c.descricao,
+            c.responsavel,
+            c.telefone,
+            c.deletado as deletadoComunidade,
+            c.enderecoid,
+            e.cep, 
+            e.logradouro, 
+            e.bairro, 
+            e.uf, 
+            e.pais, 
+            e.complemento, 
+            e.numero, 
+            e.cidade,
+            e.deletado as deletadoEndereco
+        FROM comunidade c
+        INNER JOIN 
+            endereco e ON c.enderecoid = e.id
+        WHERE c.deletado = false and c.usuarioid = $1
         ORDER BY id ASC;
     `;
 

@@ -45,7 +45,7 @@ exports.editEndereco = async (req, res) => {
         return res.status(400).json({ error: 'Nenhum campo válido para atualização' });
     }
 
-    let queryText = 'UPDATE endereço SET ';
+    let queryText = 'UPDATE endereco SET ';
     const queryValues = [];
     updates.forEach((field, index) => {
         queryValues.push(req.body[field]);
@@ -83,7 +83,7 @@ exports.deleteEndereco = async (req, res) => {
     try {
         const client = await pool.connect();
 
-        const queryText = 'UPDATE endereço SET deletado = true WHERE id = $1 RETURNING *;';
+        const queryText = 'UPDATE endereco SET deletado = true WHERE id = $1 RETURNING *;';
 
         const result = await client.query(queryText, [id]);
 
