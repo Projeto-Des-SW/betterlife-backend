@@ -64,6 +64,7 @@ router.get('/api/getAllForumByPostId/:id', forumController.buscarPostPorId);
 
 //Rotas para comunidade 
 router.post('api/registerComunidade' , comunidadeContrller.cadastrarComunidade);
+router.put('/api/updateComunidade/:id', comunidadeContrller.atualizarComunidade);
 router.put('api/deletarComunidade/:id' , comunidadeContrller.deletarComunidade);
 router.get('api/getAllComunidade' , comunidadeContrller.listarComunidades);
 router.get('api/getAllComunidadePorUser/:id' , comunidadeContrller.listarComunidadesCriadaPorUsuario);
