@@ -198,7 +198,6 @@ exports.sendEmailReset = async (req, res) => {
     }
 };
 
-
 exports.resetPasswordUser = async (req, res) => {
     const { senha, confirmacaoSenha, token } = req.body;
 
