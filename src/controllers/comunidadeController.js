@@ -121,3 +121,30 @@ exports.atualizarComunidade = async (req, res) => {
     }
 };
 
+exports.listarComunidadesCriadaPorUsuario = async (req, res) => {
+    const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).json({ error: 'ID do usuário é obrigatório' });
+    }
+
+    const queryText = `
+        SELECT * FROM comunidade
+        WHERE deletado = false and usuarioid = $1
+        ORDER BY id ASC;
+    `;
+
+    try {
+        const client = await pool.connect();
+        const result = await client.query(queryText, [id]);
+
+        client.release();
+
+        return res.status(200).json(result.rows);
+    } catch (err) {
+        console.error('Erro ao listar comunidades:', err);
+        return res.status(500).json({ error: 'Erro ao listar comunidades' });
+    }
+};
+
+
