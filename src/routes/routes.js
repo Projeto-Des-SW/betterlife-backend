@@ -8,6 +8,7 @@ const somController = require('../controllers/somController');
 const categoriaForumController = require('../controllers/categoriaForumController')
 const forumController = require('../controllers/forumController')
 const comunidadeContrller = require('../controllers/comunindadeController')
+const enderecoController = require('../controllers/enderecoController')
 
 const auth = require('../middlewares/authMiddleware');
 const cors = require('cors');
@@ -65,5 +66,10 @@ router.get('/api/getAllForumByPostId/:id', forumController.buscarPostPorId);
 router.post('api/registerCominidade' , comunidadeContrller.cadastrarComunidade);
 router.put('api/deletarCominidade/:id' , comunidadeContrller.deletarComunidade);
 router.get('api/getAllCominidade' , comunidadeContrller.listarComunidades);
+
+// Rotas para endereço
+router.post('/api/registerAddress', enderecoController.addEndereco);
+router.put('/api/updateAddress/:id', enderecoController.editEndereco);
+router.put('/api/deleteAddress/:id', enderecoController.deleteEndereco);
 
 module.exports = router;
