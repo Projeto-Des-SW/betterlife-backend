@@ -141,7 +141,8 @@ exports.listarPostsPorUsuario = async (req, res) => {
         FROM forum f
         INNER JOIN 
             categoriaforums cf ON f.categoriaforumid = cf.id
-        WHERE f.deletado = false OR f.deletado IS NULL AND f.usuarioidpergunta = $1;
+        WHERE (f.deletado = false OR f.deletado IS NULL) 
+        AND f.usuarioidpergunta = $1;
     `;
 
     try {
