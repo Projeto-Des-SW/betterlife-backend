@@ -39,7 +39,7 @@ exports.listarPosts = async (req, res) => {
             categoriaforums cf ON f.categoriaforumid = cf.id
         WHERE f.deletado = false OR f.deletado IS NULL;
     `;
-    
+
     try {
         const client = await pool.connect();
         const result = await client.query(queryText);
@@ -130,9 +130,9 @@ exports.deletarPost = async (req, res) => {
 };
 
 exports.listarPostsPorUsuario = async (req, res) => {
-    
+
     const { id } = req.params;
-    
+
     const queryText = `
        SELECT 
             f.*, 
@@ -160,7 +160,7 @@ exports.listarPostsPorUsuario = async (req, res) => {
 
 exports.listarRespostasForum = async (req, res) => {
     const { id } = req.params;
-    
+
     const queryText = `
        SELECT 
             f.*, 
@@ -186,7 +186,7 @@ exports.listarRespostasForum = async (req, res) => {
 };
 
 exports.buscarPostPorId = async (req, res) => {
-    const postId = req.params.id;  
+    const postId = req.params.id;
     const queryText = `
         SELECT 
             f.*, 
@@ -214,3 +214,59 @@ exports.buscarPostPorId = async (req, res) => {
         return res.status(500).json({ error: 'Erro ao buscar post por ID' });
     }
 };
+
+exports.addRespostaToPost = async (req, res) => {
+    const { id } = req.params; // ID do post ao qual adicionar resposta
+    const { usuarioidresposta, resposta } = req.body;
+
+    // Verifique se os dados estão corretos
+    console.log("Dados recebidos no backend:", { usuarioidresposta, resposta });
+
+    if (!resposta || !usuarioidresposta) {
+        return res.status(400).json({ error: 'Usuário e resposta são obrigatórios' });
+    }
+
+    const queryText = `
+        INSERT INTO respostas (postid, usuarioidresposta, resposta)
+        VALUES ($1, $2, $3)
+        RETURNING *;
+    `;
+    const queryValues = [id, usuarioidresposta, resposta];
+
+    try {
+        const client = await pool.connect();
+        const result = await client.query(queryText, queryValues);
+        client.release();
+
+        return res.status(201).json(result.rows[0]);
+    } catch (err) {
+        console.error('Erro ao adicionar resposta:', err);
+        return res.status(500).json({ error: 'Erro ao adicionar resposta' });
+    }
+};
+
+
+
+exports.listarRespostasPorPost = async (req, res) => {
+    const { id } = req.params; // ID do post para o qual queremos listar as respostas
+
+    const queryText = `
+        SELECT r.*, u.nome AS nomeUsuario
+        FROM respostas r
+        INNER JOIN usuario u ON r.usuarioidresposta = u.id
+        WHERE r.postid = $1
+        ORDER BY r.dataresposta ASC;
+    `;
+
+    try {
+        const client = await pool.connect();
+        const result = await client.query(queryText, [id]);
+        client.release();
+
+        return res.status(200).json(result.rows);
+    } catch (err) {
+        console.error('Erro ao listar respostas:', err);
+        return res.status(500).json({ error: 'Erro ao listar respostas' });
+    }
+};
+
