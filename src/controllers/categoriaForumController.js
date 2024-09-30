@@ -9,8 +9,8 @@ exports.createCategoriaForum = async (req, res) => {
     }
 
     const queryText = `
-        INSERT INTO categoriaforums (nome, descricao)
-        VALUES ($1, $2)
+        INSERT INTO categoriaforums (nome, descricao, deletado)
+        VALUES ($1, $2, false)
         RETURNING *;
     `;
     const queryValues = [nome, descricao];
