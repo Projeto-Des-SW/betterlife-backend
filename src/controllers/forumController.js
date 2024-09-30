@@ -2,18 +2,18 @@ const pool = require('../../config/db');
 require('dotenv').config();
 
 exports.cadastrarPost = async (req, res) => {
-    const { usuarioidpergunta, usuarioidresposta, pergunta, resposta, categoriaforumid } = req.body;
+    const { usuarioidpergunta, pergunta, categoriaforumid } = req.body;
 
     if (!usuarioidpergunta || !pergunta || !categoriaforumid) {
         return res.status(400).json({ error: 'Os campos obrigatórios não foram preenchidos' });
     }
 
     const queryText = `
-        INSERT INTO forum (usuarioidpergunta, usuarioidresposta, pergunta, resposta, datacriacao, categoriaforumid)
-        VALUES ($1, $2, $3, $4, NOW(), $5)
+        INSERT INTO forum (usuarioidpergunta, pergunta, datacriacao, categoriaforumid)
+        VALUES ($1, $2, NOW(), $3)
         RETURNING *;
     `;
-    const queryValues = [usuarioidpergunta, usuarioidresposta, pergunta, resposta, categoriaforumid];
+    const queryValues = [usuarioidpergunta, pergunta, categoriaforumid];
 
     try {
         const client = await pool.connect();
